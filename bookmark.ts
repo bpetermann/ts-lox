@@ -1,14 +1,18 @@
 import fs from 'node:fs/promises';
-import open from 'open';
+import colors from 'colors';
+
+const BASE_BOOK = 'https://craftinginterpreters.com/';
 
 (async function () {
   if (process.argv[2]) {
-    fs.writeFile('bookmark.txt', process.argv[2]);
+    await fs.writeFile('bookmark.txt', process.argv[2]);
   } else {
-    console.log('📖 open crafting interpreters');
-    const bookmark = await fs.readFile('bookmark.txt', { encoding: 'utf8' });
-    await open(`https://craftinginterpreters.com/${bookmark}.html`, {
-      wait: true,
-    });
+    const current = await fs.readFile('bookmark.txt', { encoding: 'utf8' });
+    const arrow = colors.green('➜  ');
+    const book = colors.white('Book:     ');
+    const bookmark = colors.cyan(`${BASE_BOOK}${current}.html`);
+
+    console.log(`${arrow}${book}${colors.cyan(BASE_BOOK)}`);
+    console.log(`${arrow}${colors.white('Bookmark: ')}${bookmark}`);
   }
 })();
