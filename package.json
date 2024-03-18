@@ -2,11 +2,13 @@
   "name": "ts-lox",
   "version": "1.0.0",
   "main": "./app/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "start": "node ./app/index.js",
     "fresh": "npm i && npm run build",
     "build:start": "npm run build && npm start",
+    "bookmark": "npm run build && node ./app/bookmark.js",
     "test": "jest",
     "prepare": "husky"
   },
@@ -21,6 +23,7 @@
   },
   "dependencies": {
     "colors": "^1.4.0",
+    "open": "^10.1.0",
     "typescript": "^5.2.2"
   }
 }

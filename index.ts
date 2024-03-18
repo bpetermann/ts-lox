@@ -1,3 +1,3 @@
-import { greeting } from './lib';
+import { greeting } from './lib/index.js';
 
 console.log(greeting);
