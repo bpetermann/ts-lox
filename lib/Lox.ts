@@ -1,11 +1,13 @@
 import readline from 'readline';
 import fs from 'node:fs';
 import colors from 'colors';
+import { Scanner } from './Scanner.js';
 
 export default class Lox {
   private static instance: Lox;
   private rl: readline.Interface;
   private arg?: string;
+  hadError: boolean;
 
   private constructor() {
     this.rl = readline.createInterface({
@@ -13,7 +15,7 @@ export default class Lox {
       output: process.stdout,
     });
     this.arg = process.argv[2];
-    this.main();
+    this.hadError = false;
   }
 
   public static getInstance(): Lox {
@@ -21,7 +23,7 @@ export default class Lox {
     return Lox.instance;
   }
 
-  private main(): void {
+  main(): void {
     this.arg ? this.runFile(this.arg) : this.runPrompt();
   }
 
@@ -47,13 +49,26 @@ export default class Lox {
     this.exit();
   }
 
-  private run(input: string): void {
-    console.log(input);
+  private run(source: string): void {
+    const scanner = new Scanner(source);
+    const tokens = scanner.scanTokens();
+
+    tokens.forEach((token) => {
+      console.log(token);
+    });
   }
 
   private exit(err?: Error): void {
     if (err) console.error(colors.red(err.message));
     this.rl.close();
     process.exit(0);
+  }
+
+  error(line: number, msg: string): void {
+    this.report(line, msg);
+  }
+
+  private report(line: number, msg: string) {
+    console.error(colors.red(`[line ${line}] Error: ${msg}`));
   }
 }

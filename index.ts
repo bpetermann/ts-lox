@@ -1,3 +1,3 @@
-import Lox from './lib/lox/Lox.js';
+import Lox from './lib/Lox.js';
 
-Lox.getInstance();
+Lox.getInstance().main();

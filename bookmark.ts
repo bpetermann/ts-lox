@@ -9,7 +9,7 @@ const BASE_BOOK = 'https://craftinginterpreters.com/';
   } else {
     const current = await fs.readFile('bookmark.txt', { encoding: 'utf8' });
     const arrow = colors.green('➜  ');
-    const book = colors.white('Book:     ');
+    const book = colors.white('Index:    ');
     const bookmark = colors.cyan(`${BASE_BOOK}${current}.html`);
 
     console.log(`${arrow}${book}${colors.cyan(BASE_BOOK)}`);
