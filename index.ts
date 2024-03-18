@@ -1,3 +1,3 @@
-import { greeting } from './lib/index.js';
+import Lox from './lib/lox/Lox.js';
 
-console.log(greeting);
+Lox.getInstance();
