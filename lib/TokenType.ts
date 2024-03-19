@@ -9,22 +9,22 @@ export enum TokenType {
   MINUS = '-',
   PLUS = '+',
   SEMICOLON = ';',
-  SLASH = 'SLASH',
+  SLASH = '/',
   STAR = '*',
 
   // One or two character tokens.
-  BANG = 'BANG',
-  BANG_EQUAL = 'BANG_EQUAL',
-  EQUAL = 'EQUAL',
-  EQUAL_EQUAL = '  EQUAL_EQUAL',
-  GREATER = 'GREATER',
-  GREATER_EQUAL = 'GREATER_EQUAL',
-  LESS = 'LESS',
-  LESS_EQUAL = 'LESS_EQUAL',
+  BANG = '!',
+  BANG_EQUAL = '!=',
+  EQUAL = '=',
+  EQUAL_EQUAL = '==',
+  GREATER = '>',
+  GREATER_EQUAL = '>=',
+  LESS = '<',
+  LESS_EQUAL = '<=',
 
   // Literals.
   IDENTIFIER = 'IDENTIFIER',
-  STRING = 'STRING',
+  STRING = '"',
   NUMBER = 'NUMBER',
 
   // Keywords.
@@ -46,4 +46,11 @@ export enum TokenType {
   WHILE = 'WHILE',
 
   EOF = 'EOF',
+}
+
+export enum WhiteSpace {
+  WHITESPACE = ' ',
+  TAB = '\t',
+  NEWLINE = '\n',
+  CARRIAGE_RETURN = '\r',
 }
