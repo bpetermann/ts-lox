@@ -1,10 +1,18 @@
-import type { Config } from 'jest';
+import type { JestConfigWithTsJest } from 'ts-jest';
 
-const config: Config = {
-  verbose: true,
+const jestConfig: JestConfigWithTsJest = {
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   transform: {
-    '^.+\\.ts?$': 'ts-jest',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
 };
 
-export default config;
+export default jestConfig;

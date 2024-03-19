@@ -1,4 +1,4 @@
-import Token from './Token.js';
+import { Token } from './Token.js';
 import { TokenType as T, WhiteSpace as W } from './TokenType.js';
 import Lox from './Lox.js';
 
@@ -94,6 +94,15 @@ export class Scanner {
           while (this.peek() !== W.NEWLINE && !this.isAtEnd()) {
             this.advance();
           }
+        } else if (this.match(T.STAR)) {
+          while (
+            !(this.peek() === T.STAR && this.peekNext() === T.SLASH) &&
+            !this.isAtEnd()
+          ) {
+            this.advance();
+          }
+          this.advance();
+          this.advance();
         } else {
           this.addToken(T.SLASH);
         }

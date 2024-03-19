@@ -9,7 +9,7 @@
     "fresh": "npm i && npm run build",
     "build:start": "npm run build && npm start",
     "bookmark": "npm run build && node ./app/bookmark.js",
-    "test": "jest",
+    "test": "jest --runInBand --detectOpenHandles --forceExit",
     "prepare": "husky"
   },
   "author": "bpetermann",
