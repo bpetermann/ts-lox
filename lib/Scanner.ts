@@ -6,7 +6,6 @@ export class Scanner {
   private start: number;
   private current: number;
   private line: number;
-  private lox: Lox;
   private readonly keywords: Map<string, T>;
 
   constructor(
@@ -16,7 +15,6 @@ export class Scanner {
     this.start = 0;
     this.current = 0;
     this.line = 0;
-    this.lox = Lox.getInstance();
     this.keywords = new Map();
     this.addKeywords();
   }
@@ -116,7 +114,7 @@ export class Scanner {
         } else if (this.isAlpha(c)) {
           this.identifier();
         } else {
-          this.lox.error(this.line, `Unexpected character`);
+          Lox.error(this.line, `Unexpected character`);
         }
         break;
     }
@@ -168,7 +166,7 @@ export class Scanner {
     }
 
     if (this.isAtEnd()) {
-      this.lox.error(this.line, 'Unterminated string');
+      Lox.error(this.line, 'Unterminated string');
       return;
     }
 

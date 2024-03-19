@@ -7,7 +7,7 @@ export default class Lox {
   private static instance: Lox;
   private rl: readline.Interface;
   private arg?: string;
-  hadError: boolean;
+  static hadError: boolean;
 
   private constructor() {
     this.rl = readline.createInterface({
@@ -15,7 +15,7 @@ export default class Lox {
       output: process.stdout,
     });
     this.arg = process.argv[2];
-    this.hadError = false;
+    Lox.hadError = false;
   }
 
   public static getInstance(): Lox {
@@ -34,7 +34,7 @@ export default class Lox {
   }
 
   private runPrompt(): void {
-    this.hadError = false;
+    Lox.hadError = false;
     this.rl.question('>> ', (input) =>
       !input ? this.exit() : this.processInput(input)
     );
@@ -54,7 +54,7 @@ export default class Lox {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
 
-    if (this.hadError) return;
+    if (Lox.hadError) return;
 
     tokens.forEach((token) => {
       console.log(token);
@@ -67,12 +67,12 @@ export default class Lox {
     process.exit(0);
   }
 
-  error(line: number, msg: string): void {
-    this.report(line, msg);
+  static error(line: number, msg: string): void {
+    Lox.report(line, msg);
   }
 
-  private report(line: number, msg: string) {
+  private static report(line: number, msg: string) {
     console.error(colors.red(`[line ${line}] Error: ${msg}`));
-    this.hadError = true;
+    Lox.hadError = true;
   }
 }
