@@ -2,10 +2,10 @@ import { TokenType } from './TokenType.js';
 
 export class Token {
   constructor(
-    private readonly type: TokenType,
+    public readonly type: TokenType,
     public readonly lexeme: string,
-    private readonly literal: string | number | null,
-    private readonly line: number
+    public readonly literal: string | number | boolean | null,
+    public readonly line: number
   ) {}
 
   toString() {

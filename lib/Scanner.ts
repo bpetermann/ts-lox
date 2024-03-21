@@ -194,9 +194,10 @@ export class Scanner {
   }
 
   private addToken(type: TT): void;
-  private addToken(type: TT, literal: string | number): void;
-  private addToken(type: TT, literal?: string | number): void {
+  private addToken(type: TT, literal: string | number | boolean): void;
+  private addToken(type: TT, literal?: string | number | boolean): void {
     const text = this.source.substring(this.start, this.current);
-    this.tokens.push(new Token(type, text, literal ?? null, this.line));
+    const lit = literal === undefined ? null : literal;
+    this.tokens.push(new Token(type, text, lit, this.line));
   }
 }

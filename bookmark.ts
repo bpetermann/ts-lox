@@ -4,12 +4,8 @@ import simpleGit from 'simple-git';
 
 const BASE_BOOK = 'https://craftinginterpreters.com/';
 
-const commit = () => {
-  simpleGit()
-    .add('./*')
-    .commit('Update bookmark')
-    .push(['-u', 'origin', 'main'], () => console.log('done'));
-};
+const commit = () => simpleGit().add('./bookmark.ts').commit('Update bookmark');
+() => console.log('done');
 
 (async function () {
   if (process.argv[2]) {
@@ -17,6 +13,7 @@ const commit = () => {
     commit();
   } else {
     const current = await fs.readFile('bookmark.txt', { encoding: 'utf8' });
+
     const arrow = colors.green('➜  ');
     const book = colors.white('Index:    ');
     const bookmark = colors.cyan(`${BASE_BOOK}${current}.html`);

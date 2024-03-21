@@ -2,6 +2,10 @@ import readline from 'readline';
 import fs from 'node:fs';
 import colors from 'colors';
 import { Scanner } from './Scanner.js';
+import { Token } from './Token.js';
+import { TokenType } from './TokenType.js';
+import { AstPrinter } from './AstPrinter.js';
+import { Parser } from './Parser.js';
 
 export default class Lox {
   private static instance: Lox;
@@ -53,12 +57,12 @@ export default class Lox {
   private run(source: string): void {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
+    const parser = new Parser(tokens);
+    const expression = parser.parse();
 
     if (Lox.hadError) return;
 
-    tokens.forEach((token) => {
-      console.log(token);
-    });
+    console.log(new AstPrinter().print(expression));
   }
 
   private exit(err?: Error): void {
@@ -69,6 +73,14 @@ export default class Lox {
 
   static error(line: number, msg: string): void {
     Lox.report(line, msg);
+  }
+
+  static parseError(token: Token, msg: string): void {
+    if (token.type === TokenType.EOF) {
+      Lox.report(token.line, `at end. ${msg}`);
+    } else {
+      Lox.report(token.line, `at \"${token.lexeme}\". ${msg}`);
+    }
   }
 
   private static report(line: number, msg: string) {
