@@ -5,16 +5,16 @@ export class AstPrinter implements Expr.Visitor<string> {
     return expr.accept(this);
   }
 
-  visitAssignExpr(expr: Expr.Assign): string {
+  visitAssignExpr(_: Expr.Assign): string {
     throw new Error('Method not implemented.');
   }
   visitBinaryExpr(expr: Expr.Binary): string {
     return this.parenthesize(expr.operator.lexeme, expr.left, expr.right);
   }
-  visitCallExpr(expr: Expr.Call): string {
+  visitCallExpr(_: Expr.Call): string {
     throw new Error('Method not implemented.');
   }
-  visitGetExpr(expr: Expr.Get): string {
+  visitGetExpr(_: Expr.Get): string {
     throw new Error('Method not implemented.');
   }
   visitGroupingExpr(expr: Expr.Grouping): string {
@@ -24,22 +24,22 @@ export class AstPrinter implements Expr.Visitor<string> {
     if (expr.value === null) return 'nil';
     return expr.value.toString();
   }
-  visitLogicalExpr(expr: Expr.Logical): string {
+  visitLogicalExpr(_: Expr.Logical): string {
     throw new Error('Method not implemented.');
   }
-  visitSetExpr(expr: Expr.SetExpr): string {
+  visitSetExpr(_: Expr.SetExpr): string {
     throw new Error('Method not implemented.');
   }
-  visitSuperExpr(expr: Expr.Super): string {
+  visitSuperExpr(_: Expr.Super): string {
     throw new Error('Method not implemented.');
   }
-  visitThisExpr(expr: Expr.This): string {
+  visitThisExpr(_: Expr.This): string {
     throw new Error('Method not implemented.');
   }
   visitUnaryExpr(expr: Expr.Unary): string {
     return this.parenthesize(expr.operator.lexeme, expr.right);
   }
-  visitVariableExpr(expr: Expr.Variable): string {
+  visitVariableExpr(_: Expr.Variable): string {
     throw new Error('Method not implemented.');
   }
 

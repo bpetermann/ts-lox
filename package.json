@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "colors": "^1.4.0",
+    "simple-git": "^3.23.0",
     "typescript": "^5.2.2"
   }
 }

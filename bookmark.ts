@@ -1,11 +1,20 @@
 import fs from 'node:fs/promises';
 import colors from 'colors';
+import simpleGit from 'simple-git';
 
 const BASE_BOOK = 'https://craftinginterpreters.com/';
+
+const commit = () => {
+  simpleGit()
+    .add('./*')
+    .commit('Update bookmark')
+    .push(['-u', 'origin', 'main'], () => console.log('done'));
+};
 
 (async function () {
   if (process.argv[2]) {
     await fs.writeFile('bookmark.txt', process.argv[2]);
+    commit();
   } else {
     const current = await fs.readFile('bookmark.txt', { encoding: 'utf8' });
     const arrow = colors.green('➜  ');
