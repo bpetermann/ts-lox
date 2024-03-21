@@ -1,12 +1,12 @@
 import { Token } from './Token.js';
-import { TokenType as T, WhiteSpace as W } from './TokenType.js';
+import { TokenType as TT, WhiteSpace as W } from './TokenType.js';
 import Lox from './Lox.js';
 
 export class Scanner {
   private start: number;
   private current: number;
   private line: number;
-  private readonly keywords: Map<string, T>;
+  private readonly keywords: Map<string, TT>;
 
   constructor(
     private readonly source: string,
@@ -20,22 +20,22 @@ export class Scanner {
   }
 
   private addKeywords() {
-    this.keywords.set('and', T.AND);
-    this.keywords.set('class', T.CLASS);
-    this.keywords.set('else', T.ELSE);
-    this.keywords.set('false', T.FALSE);
-    this.keywords.set('for', T.FOR);
-    this.keywords.set('fun', T.FUN);
-    this.keywords.set('if', T.IF);
-    this.keywords.set('nil', T.NIL);
-    this.keywords.set('or', T.OR);
-    this.keywords.set('print', T.PRINT);
-    this.keywords.set('return', T.RETURN);
-    this.keywords.set('super', T.SUPER);
-    this.keywords.set('this', T.THIS);
-    this.keywords.set('true', T.TRUE);
-    this.keywords.set('var', T.VAR);
-    this.keywords.set('while', T.WHILE);
+    this.keywords.set('and', TT.AND);
+    this.keywords.set('class', TT.CLASS);
+    this.keywords.set('else', TT.ELSE);
+    this.keywords.set('false', TT.FALSE);
+    this.keywords.set('for', TT.FOR);
+    this.keywords.set('fun', TT.FUN);
+    this.keywords.set('if', TT.IF);
+    this.keywords.set('nil', TT.NIL);
+    this.keywords.set('or', TT.OR);
+    this.keywords.set('print', TT.PRINT);
+    this.keywords.set('return', TT.RETURN);
+    this.keywords.set('super', TT.SUPER);
+    this.keywords.set('this', TT.THIS);
+    this.keywords.set('true', TT.TRUE);
+    this.keywords.set('var', TT.VAR);
+    this.keywords.set('while', TT.WHILE);
   }
 
   scanTokens(): Array<Token> {
@@ -44,7 +44,7 @@ export class Scanner {
       this.scanToken();
     }
 
-    this.tokens.push(new Token(T.EOF, '', null, this.line));
+    this.tokens.push(new Token(TT.EOF, '', null, this.line));
     return this.tokens;
   }
 
@@ -63,38 +63,38 @@ export class Scanner {
       case W.NEWLINE:
         this.line++;
         break;
-      case T.LEFT_PAREN:
-      case T.RIGHT_PAREN:
-      case T.LEFT_BRACE:
-      case T.RIGHT_BRACE:
-      case T.COMMA:
-      case T.DOT:
-      case T.MINUS:
-      case T.PLUS:
-      case T.SEMICOLON:
-      case T.STAR:
-        this.addToken(c as T);
+      case TT.LEFT_PAREN:
+      case TT.RIGHT_PAREN:
+      case TT.LEFT_BRACE:
+      case TT.RIGHT_BRACE:
+      case TT.COMMA:
+      case TT.DOT:
+      case TT.MINUS:
+      case TT.PLUS:
+      case TT.SEMICOLON:
+      case TT.STAR:
+        this.addToken(c as TT);
         break;
-      case T.BANG:
-        this.addToken(this.match(T.EQUAL) ? T.BANG_EQUAL : T.BANG);
+      case TT.BANG:
+        this.addToken(this.match(TT.EQUAL) ? TT.BANG_EQUAL : TT.BANG);
         break;
-      case T.EQUAL:
-        this.addToken(this.match(T.EQUAL) ? T.EQUAL_EQUAL : T.EQUAL);
+      case TT.EQUAL:
+        this.addToken(this.match(TT.EQUAL) ? TT.EQUAL_EQUAL : TT.EQUAL);
         break;
-      case T.LESS:
-        this.addToken(this.match(T.EQUAL) ? T.LESS_EQUAL : T.LESS);
+      case TT.LESS:
+        this.addToken(this.match(TT.EQUAL) ? TT.LESS_EQUAL : TT.LESS);
         break;
-      case T.GREATER:
-        this.addToken(this.match(T.EQUAL) ? T.GREATER_EQUAL : T.GREATER);
+      case TT.GREATER:
+        this.addToken(this.match(TT.EQUAL) ? TT.GREATER_EQUAL : TT.GREATER);
         break;
-      case T.SLASH:
-        if (this.match(T.SLASH)) {
+      case TT.SLASH:
+        if (this.match(TT.SLASH)) {
           while (this.peek() !== W.NEWLINE && !this.isAtEnd()) {
             this.advance();
           }
-        } else if (this.match(T.STAR)) {
+        } else if (this.match(TT.STAR)) {
           while (
-            !(this.peek() === T.STAR && this.peekNext() === T.SLASH) &&
+            !(this.peek() === TT.STAR && this.peekNext() === TT.SLASH) &&
             !this.isAtEnd()
           ) {
             this.advance();
@@ -102,10 +102,10 @@ export class Scanner {
           this.advance();
           this.advance();
         } else {
-          this.addToken(T.SLASH);
+          this.addToken(TT.SLASH);
         }
         break;
-      case T.STRING:
+      case TT.STRING:
         this.string();
         break;
       default:
@@ -125,7 +125,7 @@ export class Scanner {
 
     const text = this.source.substring(this.start, this.current);
     const type = this.keywords.get(text);
-    this.addToken(!type ? T.IDENTIFIER : type);
+    this.addToken(!type ? TT.IDENTIFIER : type);
   }
 
   private isAlphaNumeric(c: string): boolean {
@@ -141,13 +141,13 @@ export class Scanner {
       this.advance();
     }
 
-    if (this.peek() === T.DOT && this.isDigit(this.peekNext())) {
+    if (this.peek() === TT.DOT && this.isDigit(this.peekNext())) {
       this.advance();
 
       while (this.isDigit(this.peek())) this.advance();
     }
 
-    this.addToken(T.NUMBER, +this.source.substring(this.start, this.current));
+    this.addToken(TT.NUMBER, +this.source.substring(this.start, this.current));
   }
 
   private peekNext() {
@@ -160,7 +160,7 @@ export class Scanner {
   }
 
   private string(): void {
-    while (this.peek() != T.STRING && !this.isAtEnd()) {
+    while (this.peek() != TT.STRING && !this.isAtEnd()) {
       if (this.peek() === W.NEWLINE) this.line++;
       this.advance();
     }
@@ -173,7 +173,7 @@ export class Scanner {
     this.advance();
 
     const value = this.source.substring(this.start + 1, this.current - 1);
-    this.addToken(T.STRING, value);
+    this.addToken(TT.STRING, value);
   }
 
   private peek(): string {
@@ -181,7 +181,7 @@ export class Scanner {
     return this.source.charAt(this.current);
   }
 
-  private match(expected: T): boolean {
+  private match(expected: TT): boolean {
     if (this.isAtEnd()) return false;
     if (this.source.charAt(this.current) !== expected) return false;
 
@@ -193,9 +193,9 @@ export class Scanner {
     return this.source.charAt(this.current++);
   }
 
-  private addToken(type: T): void;
-  private addToken(type: T, literal: Object): void;
-  private addToken(type: T, literal?: Object): void {
+  private addToken(type: TT): void;
+  private addToken(type: TT, literal: string | number): void;
+  private addToken(type: TT, literal?: string | number): void {
     const text = this.source.substring(this.start, this.current);
     this.tokens.push(new Token(type, text, literal ?? null, this.line));
   }
