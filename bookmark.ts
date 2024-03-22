@@ -4,8 +4,10 @@ import simpleGit from 'simple-git';
 
 const BASE_BOOK = 'https://craftinginterpreters.com/';
 
-const commit = () => simpleGit().add('./bookmark.ts').commit('Update bookmark');
-() => console.log('done');
+const commit = () => {
+  simpleGit().add('./bookmark.txt').commit('Update bookmark 🔖'),
+    () => console.log('done');
+};
 
 (async function () {
   if (process.argv[2]) {
