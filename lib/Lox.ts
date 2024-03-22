@@ -4,14 +4,18 @@ import colors from 'colors';
 import { Scanner } from './Scanner.js';
 import { Token } from './Token.js';
 import { TokenType } from './TokenType.js';
-import { AstPrinter } from './AstPrinter.js';
 import { Parser } from './Parser.js';
+import { RuntimeError } from './Error.js';
+import { Interpreter } from './Interpreter.js';
 
+type ExitCode = 0 | 7;
 export default class Lox {
   private static instance: Lox;
   private rl: readline.Interface;
   private arg?: string;
+  private interpreter: Interpreter;
   static hadError: boolean;
+  static hadRuntimeError: boolean;
 
   private constructor() {
     this.rl = readline.createInterface({
@@ -19,7 +23,9 @@ export default class Lox {
       output: process.stdout,
     });
     this.arg = process.argv[2];
+    this.interpreter = new Interpreter();
     Lox.hadError = false;
+    Lox.hadRuntimeError = false;
   }
 
   public static getInstance(): Lox {
@@ -33,14 +39,14 @@ export default class Lox {
 
   private runFile(file: string): void {
     fs.readFile(file, 'utf8', (err, data) =>
-      err ? this.exit(err) : this.runAndExit(data)
+      err ? this.readFileError(err) : this.runAndExit(data)
     );
   }
 
   private runPrompt(): void {
     Lox.hadError = false;
     this.rl.question('>> ', (input) =>
-      !input ? this.exit() : this.processInput(input)
+      !input ? this.exit(0) : this.processInput(input)
     );
   }
 
@@ -51,7 +57,7 @@ export default class Lox {
 
   private runAndExit(input: string): void {
     this.run(input);
-    this.exit();
+    this.exit(Lox.hadRuntimeError ? 7 : 0);
   }
 
   private run(source: string): void {
@@ -62,13 +68,17 @@ export default class Lox {
 
     if (Lox.hadError) return;
 
-    console.log(new AstPrinter().print(expression));
+    this.interpreter.interpret(expression);
   }
 
-  private exit(err?: Error): void {
-    if (err) console.error(colors.red(err.message));
+  private exit(code: ExitCode): void {
     this.rl.close();
-    process.exit(0);
+    process.exit(code);
+  }
+
+  private readFileError(err: Error) {
+    console.error(colors.red(err.message));
+    this.exit(7);
   }
 
   static error(line: number, msg: string): void {
@@ -81,6 +91,11 @@ export default class Lox {
     } else {
       Lox.report(token.line, `at \"${token.lexeme}\". ${msg}`);
     }
+  }
+
+  static runtimeError(error: RuntimeError): void {
+    console.error(colors.red(`${error.message} \n[line ${error.token.line}]`));
+    this.hadRuntimeError = true;
   }
 
   private static report(line: number, msg: string) {

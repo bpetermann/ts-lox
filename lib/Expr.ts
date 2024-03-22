@@ -1,4 +1,5 @@
 import { Token } from './Token.js';
+import { NullableObj } from './Interpreter.js';
 
 abstract class Expr {
   abstract accept<T>(visitor: Visitor<T>): T;
@@ -75,7 +76,7 @@ class Grouping extends Expr {
 }
 
 class Literal extends Expr {
-  constructor(public readonly value: string | number | boolean | null) {
+  constructor(public readonly value: NullableObj) {
     super();
   }
   override accept<T>(visitor: Visitor<T>): T {

@@ -1,3 +1,4 @@
+import { ParseError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
 import { Token } from './Token.js';
@@ -158,12 +159,5 @@ export class Parser {
 
   private previous(): Token {
     return this.tokens[this.current - 1];
-  }
-}
-
-class ParseError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ParseError';
   }
 }

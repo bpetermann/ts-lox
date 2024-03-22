@@ -21,7 +21,7 @@ export class AstPrinter implements Expr.Visitor<string> {
     return this.parenthesize('group', expr.expression);
   }
   visitLiteralExpr(expr: Expr.Literal): string {
-    if (expr.value === null) return 'nil';
+    if (!expr.value) return 'nil';
     return expr.value.toString();
   }
   visitLogicalExpr(_: Expr.Logical): string {

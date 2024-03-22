@@ -1,12 +1,10 @@
 import { TokenType } from './TokenType.js';
-
-type Literal = string | number | boolean | null;
-
+import { NullableObj } from './Interpreter.js';
 export class Token {
   constructor(
     public readonly type: TokenType,
     public readonly lexeme: string,
-    public readonly literal: Literal,
+    public readonly literal: NullableObj,
     public readonly line: number
   ) {}
 
