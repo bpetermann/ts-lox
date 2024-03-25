@@ -1,5 +1,6 @@
+import { NullableExpr } from './@types/index.js';
 import * as Expr from './Expr.js';
-
+import { Token } from './Token.js';
 abstract class Stmt {
   abstract accept<T>(visitor: Visitor<T>): T;
 }
@@ -67,8 +68,15 @@ class ReturnStmt extends Stmt {
 }
 
 class VarStmt extends Stmt {
+  constructor(
+    public readonly name: Token,
+    public readonly initializer: NullableExpr
+  ) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitVarStmt(this);
   }
 }
 

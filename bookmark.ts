@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import colors from 'colors';
 import simpleGit from 'simple-git';
 
-const BASE_BOOK = 'https://craftinginterpreters.com/';
+const BASE_BOOK = 'https://craftinginterpreters.com/' as const;
 
 const commit = () => {
   simpleGit().add('./bookmark.txt').commit('Update bookmark 🔖'),

@@ -2,9 +2,10 @@ import { expect } from '@jest/globals';
 import { Scanner } from '../Scanner';
 import { Parser } from '../Parser';
 import { AstPrinter } from '../AstPrinter';
-import { Stmt, ExpressionStmt } from '../Stmt';
+import { ExpressionStmt } from '../Stmt';
+import { NullableStmt } from '../@types';
 
-const parse = (source: string): Stmt[] => {
+const parse = (source: string): NullableStmt[] => {
   const scanner = new Scanner(source);
   const tokens = scanner.scanTokens();
   const parser = new Parser(tokens);

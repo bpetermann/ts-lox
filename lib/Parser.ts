@@ -1,3 +1,4 @@
+import { Expression, NullableStmt, Statement } from './@types/index.js';
 import { ParseError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
@@ -5,19 +6,27 @@ import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
 import * as Stmt from './Stmt.js';
 
-type Expression = Expr.Expr;
-type Statement = Stmt.Stmt;
 export class Parser {
   private current: number = 0;
   constructor(private readonly tokens: Array<Token>) {}
 
-  parse(): Array<Statement> {
-    const statements: Statement[] = [];
+  parse(): Array<NullableStmt> {
+    const statements: NullableStmt[] = [];
     while (!this.isAtEnd()) {
-      statements.push(this.statement());
+      statements.push(this.declaration());
     }
 
     return statements;
+  }
+
+  private declaration(): NullableStmt {
+    try {
+      if (this.match(TT.VAR)) return this.varDeclaration();
+      return this.statement();
+    } catch (err) {
+      this.synchronize();
+      return null;
+    }
   }
 
   private statement(): Statement {
@@ -36,6 +45,18 @@ export class Parser {
     const value = this.expression();
     this.consume(TT.SEMICOLON, "Expect ';' after value.");
     return new Stmt.PrintStmt(value);
+  }
+
+  private varDeclaration(): Statement {
+    const name = this.consume(TT.IDENTIFIER, 'Expect variable name.');
+
+    let initializer: Expression | null = null;
+    if (this.match(TT.EQUAL)) {
+      initializer = this.expression();
+    }
+
+    this.consume(TT.SEMICOLON, "Expect ';' after variable declaration.");
+    return new Stmt.VarStmt(name, initializer);
   }
 
   private expression(): Expression {
@@ -104,10 +125,10 @@ export class Parser {
     if (this.match(TT.FALSE)) return new Expr.Literal(false);
     if (this.match(TT.TRUE)) return new Expr.Literal(true);
     if (this.match(TT.NIL)) return new Expr.Literal(null);
-
-    if (this.match(TT.NUMBER, TT.STRING)) {
+    if (this.match(TT.NUMBER, TT.STRING))
       return new Expr.Literal(this.previous().literal);
-    }
+
+    if (this.match(TT.IDENTIFIER)) return new Expr.Variable(this.previous());
 
     if (this.match(TT.LEFT_PAREN)) {
       const expr = this.expression();

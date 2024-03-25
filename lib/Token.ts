@@ -1,5 +1,6 @@
+import { NullableObj } from './@types/index.js';
 import { TokenType } from './TokenType.js';
-import { NullableObj } from './Interpreter.js';
+
 export class Token {
   constructor(
     public readonly type: TokenType,

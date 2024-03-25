@@ -1,5 +1,5 @@
+import { NullableObj } from './@types/index.js';
 import { Token } from './Token.js';
-import { NullableObj } from './Interpreter.js';
 
 abstract class Expr {
   abstract accept<T>(visitor: Visitor<T>): T;

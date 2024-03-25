@@ -1,3 +1,4 @@
+import { NullableObj, NullableStmt, Statement } from './@types/index.js';
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
@@ -5,17 +6,13 @@ import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
 
-export type NullableObj = Nullable<Object>;
-type Nullable<T> = T | null;
-type Statement = Stmt.Stmt;
-
 export class Interpreter
   implements Expr.Visitor<NullableObj>, Stmt.Visitor<void>
 {
-  public interpret(statements: Array<Statement>): void {
+  public interpret(statements: Array<NullableStmt>): void {
     try {
       statements.forEach((stmt) => {
-        this.execute(stmt);
+        if (stmt) this.execute(stmt);
       });
     } catch (err) {
       Lox.runtimeError(err);
