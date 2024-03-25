@@ -15,8 +15,17 @@ const readEvalPrint = (source: string): void => {
 };
 
 describe('Test interpretor visitor class', () => {
-  it('should evaluate mathematical operations', () => {
-    const logSpy = jest.spyOn(global.console, 'log');
+  let logSpy: jest.SpyInstance | undefined;
+
+  beforeEach(() => {
+    logSpy = jest.spyOn(global.console, 'log');
+  });
+
+  afterEach(() => {
+    if (logSpy) logSpy.mockRestore();
+  });
+
+  test('mathematical operations', () => {
     const input: [string, string][] = [
       [`print 5;`, '5'],
       [`print (5 + 10 * 2 + 15 / 3) * 2 + -10;`, '50'],
@@ -26,41 +35,43 @@ describe('Test interpretor visitor class', () => {
 
     input.forEach(([source, expected]) => {
       readEvalPrint(source);
+
       expect(logSpy).toHaveBeenCalledWith(expected);
     });
-
-    logSpy.mockRestore();
   });
 
-  it('should convert a number to string', () => {
-    const logSpy = jest.spyOn(global.console, 'log');
+  test('convert a number to string when combined', () => {
     const input = 'print 1 + "1";';
     const expected = '11';
 
     readEvalPrint(input);
     expect(logSpy).toHaveBeenCalledWith(expected);
-
-    logSpy.mockRestore();
   });
 
-  it('should not evaluate 0 to nil', () => {
-    const logSpy = jest.spyOn(global.console, 'log');
+  test('should not evaluate 0 to nil', () => {
     const input = 'print 1 + 0;';
     const expected = '1';
 
     readEvalPrint(input);
     expect(logSpy).toHaveBeenCalledWith(expected);
-
-    logSpy.mockRestore();
   });
 
-  it('should be an error when dividing by zero', () => {
-    const logSpy = jest.spyOn(global.console, 'error');
+  test('dividing by zero should result in an error', () => {
+    logSpy = jest.spyOn(global.console, 'error');
     const input = 'print 10 / 0;';
 
     readEvalPrint(input);
     expect(console.error).toHaveBeenCalled();
+  });
 
-    logSpy.mockRestore();
+  it('should reassign a defined variable', () => {
+    const input = `
+    var a = "hello, world!";
+    a = 5;
+    print a;`;
+    const expected = '5';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expected);
   });
 });

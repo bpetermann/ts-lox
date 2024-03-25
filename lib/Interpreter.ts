@@ -26,10 +26,6 @@ export class Interpreter
     stmt.accept(this);
   }
 
-  visitAssignExpr(expr: Expr.Assign): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
   visitBinaryExpr(expr: Expr.Binary): NullableObj {
     const left = this.evaluate(expr.left);
     const right = this.evaluate(expr.right);
@@ -83,36 +79,12 @@ export class Interpreter
     return null;
   }
 
-  visitCallExpr(expr: Expr.Call): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitGetExpr(expr: Expr.Get): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
   visitGroupingExpr(expr: Expr.Grouping): NullableObj {
     return this.evaluate(expr.expression);
   }
 
   visitLiteralExpr(expr: Expr.Literal): NullableObj {
     return expr.value ?? 'nil';
-  }
-
-  visitLogicalExpr(expr: Expr.Logical): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitSetExpr(expr: Expr.SetExpr): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitSuperExpr(expr: Expr.Super): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitThisExpr(expr: Expr.This): NullableObj {
-    throw new Error('Method not implemented.');
   }
 
   visitUnaryExpr(expr: Expr.Unary): NullableObj {
@@ -154,6 +126,12 @@ export class Interpreter
     this.environment.define(stmt.name.lexeme, value);
   }
 
+  visitAssignExpr(expr: Expr.Assign): NullableObj {
+    const value = this.evaluate(expr.value);
+    this.environment.assign(expr.name, value);
+    return value;
+  }
+
   private isTruthy(object: NullableObj): boolean {
     if (object === null) return false;
     if (typeof object === 'boolean') return Boolean(object);
@@ -178,6 +156,33 @@ export class Interpreter
     if (object === null) return 'nil';
     return object.toString();
   }
+
+  // Expressions
+  visitCallExpr(expr: Expr.Call): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  visitGetExpr(expr: Expr.Get): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  visitLogicalExpr(expr: Expr.Logical): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  visitSetExpr(expr: Expr.SetExpr): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  visitSuperExpr(expr: Expr.Super): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  visitThisExpr(expr: Expr.This): NullableObj {
+    throw new Error('Method not implemented.');
+  }
+
+  // Statements
 
   visitBlockStmt(stmt: Stmt.BlockStmt): void {
     throw new Error('Method not implemented.');
