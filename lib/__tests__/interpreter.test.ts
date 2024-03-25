@@ -53,4 +53,14 @@ describe('Test interpretor visitor class', () => {
 
     logSpy.mockRestore();
   });
+
+  it('should be an error when dividing by zero', () => {
+    const logSpy = jest.spyOn(global.console, 'error');
+    const input = '10 / 0';
+
+    readEvalPrint(input);
+    expect(console.error).toHaveBeenCalled();
+
+    logSpy.mockRestore();
+  });
 });

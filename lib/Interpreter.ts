@@ -45,6 +45,8 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
         return +left - +right;
       case TT.SLASH:
         this.checkNumberOperands(expr.operator, left, right);
+        if (right === 0)
+          throw new RuntimeError(expr.operator, 'Division by zero.');
         return +left / +right;
       case TT.STAR:
         this.checkNumberOperands(expr.operator, left, right);
@@ -141,9 +143,6 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
     left: NullableObj,
     right: NullableObj
   ): void {
-    console.log(typeof left);
-    console.log(typeof right);
-
     if (typeof left === 'number' && typeof right === 'number') return;
     throw new RuntimeError(operator, 'Operands must be numbers.');
   }
