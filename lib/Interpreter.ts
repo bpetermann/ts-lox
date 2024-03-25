@@ -1,4 +1,5 @@
 import { NullableObj, NullableStmt, Statement } from './@types/index.js';
+import Environment from './Environment.js';
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
@@ -9,6 +10,8 @@ import { TokenType as TT } from './TokenType.js';
 export class Interpreter
   implements Expr.Visitor<NullableObj>, Stmt.Visitor<void>
 {
+  constructor(private environment: Environment = new Environment()) {}
+
   public interpret(statements: Array<NullableStmt>): void {
     try {
       statements.forEach((stmt) => {
@@ -126,7 +129,7 @@ export class Interpreter
   }
 
   visitVariableExpr(expr: Expr.Variable): NullableObj {
-    throw new Error('Method not implemented.');
+    return this.environment.get(expr.name);
   }
 
   private evaluate(expr: Expr.Expr): NullableObj {
@@ -140,6 +143,15 @@ export class Interpreter
   visitPrintStmt(stmt: Stmt.PrintStmt): void {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
+  }
+
+  visitVarStmt(stmt: Stmt.VarStmt): void {
+    let value: NullableObj = null;
+    if (stmt.initializer !== null) {
+      value = this.evaluate(stmt.initializer);
+    }
+
+    this.environment.define(stmt.name.lexeme, value);
   }
 
   private isTruthy(object: NullableObj): boolean {
@@ -184,9 +196,7 @@ export class Interpreter
   visitReturnStmt(stmt: Stmt.ReturnStmt): void {
     throw new Error('Method not implemented.');
   }
-  visitVarStmt(stmt: Stmt.VarStmt): void {
-    throw new Error('Method not implemented.');
-  }
+
   visitWhileStmt(stmt: Stmt.WhileStmt): void {
     throw new Error('Method not implemented.');
   }
