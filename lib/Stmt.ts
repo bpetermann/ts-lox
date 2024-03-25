@@ -54,7 +54,7 @@ class PrintStmt extends Stmt {
   constructor(public readonly expression: Expr.Expr) {
     super();
   }
-  
+
   override accept<T>(visitor: Visitor<T>): T {
     return visitor.visitPrintStmt(this);
   }
@@ -77,3 +77,17 @@ class WhileStmt extends Stmt {
     throw new Error('Method not implemented.');
   }
 }
+
+export {
+  Stmt,
+  Visitor,
+  BlockStmt,
+  ClassStmt,
+  ExpressionStmt,
+  FunctionStmt,
+  IfStmt,
+  PrintStmt,
+  ReturnStmt,
+  VarStmt,
+  WhileStmt,
+};

@@ -1,20 +1,29 @@
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
+import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
 
 export type NullableObj = Nullable<Object>;
 type Nullable<T> = T | null;
+type Statement = Stmt.Stmt;
 
-export class Interpreter implements Expr.Visitor<NullableObj> {
-  public interpret(expression: Expr.Expr): void {
+export class Interpreter
+  implements Expr.Visitor<NullableObj>, Stmt.Visitor<void>
+{
+  public interpret(statements: Array<Statement>): void {
     try {
-      const value = this.evaluate(expression);
-      console.log(this.stringify(value));
+      statements.forEach((stmt) => {
+        this.execute(stmt);
+      });
     } catch (err) {
       Lox.runtimeError(err);
     }
+  }
+
+  private execute(stmt: Statement): void {
+    stmt.accept(this);
   }
 
   visitAssignExpr(expr: Expr.Assign): NullableObj {
@@ -127,6 +136,15 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
     return expr.accept(this);
   }
 
+  visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
+    this.evaluate(stmt.expression);
+  }
+
+  visitPrintStmt(stmt: Stmt.PrintStmt): void {
+    const value = this.evaluate(stmt.expression);
+    console.log(this.stringify(value));
+  }
+
   private isTruthy(object: NullableObj): boolean {
     if (object === null) return false;
     if (typeof object === 'boolean') return Boolean(object);
@@ -150,5 +168,29 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
   private stringify(object: NullableObj): string {
     if (object === null) return 'nil';
     return object.toString();
+  }
+
+  visitBlockStmt(stmt: Stmt.BlockStmt): void {
+    throw new Error('Method not implemented.');
+  }
+  visitClassStmt(stmt: Stmt.ClassStmt): void {
+    throw new Error('Method not implemented.');
+  }
+
+  visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
+    throw new Error('Method not implemented.');
+  }
+  visitIfStmt(stmt: Stmt.IfStmt): void {
+    throw new Error('Method not implemented.');
+  }
+
+  visitReturnStmt(stmt: Stmt.ReturnStmt): void {
+    throw new Error('Method not implemented.');
+  }
+  visitVarStmt(stmt: Stmt.VarStmt): void {
+    throw new Error('Method not implemented.');
+  }
+  visitWhileStmt(stmt: Stmt.WhileStmt): void {
+    throw new Error('Method not implemented.');
   }
 }

@@ -1,10 +1,10 @@
 import { expect } from '@jest/globals';
 import { Scanner } from '../Scanner';
-import { Expr } from '../Expr';
 import { Parser } from '../Parser';
 import { AstPrinter } from '../AstPrinter';
+import { Stmt, ExpressionStmt } from '../Stmt';
 
-const parse = (source: string): Expr => {
+const parse = (source: string): Stmt[] => {
   const scanner = new Scanner(source);
   const tokens = scanner.scanTokens();
   const parser = new Parser(tokens);
@@ -13,10 +13,16 @@ const parse = (source: string): Expr => {
 
 describe('Test parser class', () => {
   it('should create an array of tokens', () => {
-    const input = '- 123 * (45.67)';
+    const input = '- 123 * (45.67);';
     const expected = '(* (- 123) (group 45.67))';
     const actual = parse(input);
 
-    expect(new AstPrinter().print(actual)).toEqual(expected);
+    if (!(actual[0] instanceof ExpressionStmt)) {
+      throw new Error(`statement is not expression statement`);
+    }
+
+    const expr = (actual[0] as ExpressionStmt).expression;
+
+    expect(new AstPrinter().print(expr)).toEqual(expected);
   });
 });

@@ -3,19 +3,39 @@ import * as Expr from './Expr.js';
 import Lox from './Lox.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
+import * as Stmt from './Stmt.js';
 
 type Expression = Expr.Expr;
-
+type Statement = Stmt.Stmt;
 export class Parser {
   private current: number = 0;
   constructor(private readonly tokens: Array<Token>) {}
 
-  parse(): Expression {
-    try {
-      return this.expression();
-    } catch (err: any) {
-      return new Expr.Literal(null);
+  parse(): Array<Statement> {
+    const statements: Statement[] = [];
+    while (!this.isAtEnd()) {
+      statements.push(this.statement());
     }
+
+    return statements;
+  }
+
+  private statement(): Statement {
+    if (this.match(TT.PRINT)) return this.printStatement();
+
+    return this.expressionStatement();
+  }
+
+  private expressionStatement(): Statement {
+    const expr = this.expression();
+    this.consume(TT.SEMICOLON, "Expect ';' after value.");
+    return new Stmt.ExpressionStmt(expr);
+  }
+
+  private printStatement(): Statement {
+    const value = this.expression();
+    this.consume(TT.SEMICOLON, "Expect ';' after value.");
+    return new Stmt.PrintStmt(value);
   }
 
   private expression(): Expression {
