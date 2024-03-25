@@ -60,7 +60,25 @@ export class Parser {
   }
 
   private expression(): Expression {
-    return this.equality();
+    return this.assignment();
+  }
+
+  private assignment(): Expression {
+    const expr = this.equality();
+
+    if (this.match(TT.EQUAL)) {
+      const equals = this.previous();
+      const value = this.assignment();
+
+      if (expr instanceof Expr.Variable) {
+        const name = (expr as Expr.Variable).name;
+        return new Expr.Assign(name, value);
+      }
+
+      throw this.ParseError(equals, 'Invalid assignment target.');
+    }
+
+    return expr;
   }
 
   private equality(): Expression {
