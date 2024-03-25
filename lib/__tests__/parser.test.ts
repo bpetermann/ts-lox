@@ -11,10 +11,12 @@ const parse = (source: string): Expr => {
   return parser.parse();
 };
 
-it('should create an array of tokens', () => {
-  const input = '- 123 * (45.67)';
-  const expected = '(* (- 123) (group 45.67))';
-  const actual = parse(input);
+describe('Test parser class', () => {
+  it('should create an array of tokens', () => {
+    const input = '- 123 * (45.67)';
+    const expected = '(* (- 123) (group 45.67))';
+    const actual = parse(input);
 
-  expect(new AstPrinter().print(actual)).toEqual(expected);
+    expect(new AstPrinter().print(actual)).toEqual(expected);
+  });
 });

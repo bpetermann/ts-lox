@@ -53,7 +53,10 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
         if (typeof left === 'number' && typeof right === 'number') {
           return +left + +right;
         }
-        if (typeof left === 'string' && typeof right === 'string') {
+        if (
+          (typeof left === 'string' || typeof left === 'number') &&
+          (typeof right === 'string' || typeof right === 'number')
+        ) {
           return left.toString() + right.toString();
         }
         throw new RuntimeError(
@@ -82,7 +85,7 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
   }
 
   visitLiteralExpr(expr: Expr.Literal): NullableObj {
-    return !expr.value ? 'nil' : expr.value;
+    return expr.value ?? 'nil';
   }
 
   visitLogicalExpr(expr: Expr.Logical): NullableObj {
@@ -138,6 +141,9 @@ export class Interpreter implements Expr.Visitor<NullableObj> {
     left: NullableObj,
     right: NullableObj
   ): void {
+    console.log(typeof left);
+    console.log(typeof right);
+
     if (typeof left === 'number' && typeof right === 'number') return;
     throw new RuntimeError(operator, 'Operands must be numbers.');
   }

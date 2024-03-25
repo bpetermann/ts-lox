@@ -31,4 +31,26 @@ describe('Test interpretor visitor class', () => {
 
     logSpy.mockRestore();
   });
+
+  it('should convert a number to string', () => {
+    const logSpy = jest.spyOn(global.console, 'log');
+    const input = '1 + "1"';
+    const expected = '11';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expected);
+
+    logSpy.mockRestore();
+  });
+
+  it('should not evaluate 0 to nil', () => {
+    const logSpy = jest.spyOn(global.console, 'log');
+    const input = '1 + 0';
+    const expected = '1';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expected);
+
+    logSpy.mockRestore();
+  });
 });
