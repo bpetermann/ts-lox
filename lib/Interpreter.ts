@@ -100,6 +100,18 @@ export class Interpreter
     return expr.value ?? 'nil';
   }
 
+  visitLogicalExpr(expr: Expr.Logical): NullableObj {
+    const left = this.evaluate(expr.left);
+
+    if (expr.operator.type === TT.OR) {
+      if (this.isTruthy(left)) return left;
+    } else {
+      if (!this.isTruthy(left)) return left;
+    }
+
+    return this.evaluate(expr.right);
+  }
+
   visitUnaryExpr(expr: Expr.Unary): NullableObj {
     const right = this.evaluate(expr.right);
     switch (expr.operator.type) {
@@ -163,7 +175,7 @@ export class Interpreter
   }
 
   private isTruthy(object: NullableObj): boolean {
-    if (object === null) return false;
+    if (object === null || object === 'nil') return false;
     if (typeof object === 'boolean') return Boolean(object);
     return true;
   }
@@ -183,10 +195,10 @@ export class Interpreter
   }
 
   private stringify(object: NullableObj): string {
-    if (object === null) return colors.magenta('nil');
+    if (object === null || object === 'nil') return colors.magenta('nil');
     switch (typeof object) {
       case 'string':
-        return colors.cyan(object.toString());
+        return colors.cyan(`"${object.toString()}"`);
       case 'number':
         return colors.green(object.toString());
       case 'boolean':
@@ -202,10 +214,6 @@ export class Interpreter
   }
 
   visitGetExpr(expr: Expr.Get): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitLogicalExpr(expr: Expr.Logical): NullableObj {
     throw new Error('Method not implemented.');
   }
 

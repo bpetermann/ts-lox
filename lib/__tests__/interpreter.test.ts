@@ -14,8 +14,6 @@ const readEvalPrint = (source: string): void => {
   interpreter.interpret(expression);
 };
 
-const cleanString = (input: string) => new RegExp(input.replace(/\n/g, '\\s*'));
-
 describe('Test interpretor visitor class', () => {
   let logSpy: jest.SpyInstance | undefined;
 
@@ -66,7 +64,7 @@ describe('Test interpretor visitor class', () => {
     expect(console.error).toHaveBeenCalled();
   });
 
-  it('should reassign a defined variable', () => {
+  test('reassign a defined variable', () => {
     const input = `
     var a = "hello, world!";
     a = 5;
@@ -75,5 +73,19 @@ describe('Test interpretor visitor class', () => {
 
     readEvalPrint(input);
     expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
+  });
+
+  test('conditional statements', () => {
+    const input: [string, string][] = [
+      [`if(1 < 3) true; else false;`, 'true'],
+      [`print "hi" or 2; `, 'hi'],
+      [`print nil or "yes";`, 'yes'],
+    ];
+
+    input.forEach(([source, expected]) => {
+      readEvalPrint(source);
+
+      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
+    });
   });
 });

@@ -92,7 +92,7 @@ export class Parser {
   }
 
   private assignment(): Expression {
-    const expr = this.equality();
+    const expr = this.or();
 
     if (this.match(TT.EQUAL)) {
       const equals = this.previous();
@@ -104,6 +104,30 @@ export class Parser {
       }
 
       throw this.ParseError(equals, 'Invalid assignment target.');
+    }
+
+    return expr;
+  }
+
+  private or(): Expression {
+    let expr = this.and();
+
+    while (this.match(TT.OR)) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Expr.Logical(expr, operator, right);
+    }
+
+    return expr;
+  }
+
+  private and(): Expression {
+    let expr = this.equality();
+
+    while (this.match(TT.AND)) {
+      const operator = this.previous();
+      const right = this.and();
+      expr = new Expr.Logical(expr, operator, right);
     }
 
     return expr;
