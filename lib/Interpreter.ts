@@ -1,4 +1,4 @@
-import { NullableObj, NullableStmt, Statement } from './@types/index.js';
+import { NullableObj, Statement } from './@types/index.js';
 import Environment from './Environment.js';
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
@@ -12,7 +12,7 @@ export class Interpreter
 {
   constructor(private environment: Environment = new Environment()) {}
 
-  public interpret(statements: Array<NullableStmt>): void {
+  public interpret(statements: Array<Statement>): void {
     try {
       statements.forEach((stmt) => {
         if (stmt) this.execute(stmt);
@@ -24,6 +24,18 @@ export class Interpreter
 
   private execute(stmt: Statement): void {
     stmt.accept(this);
+  }
+
+  executeBlock(statements: Array<Statement>, env: Environment): void {
+    const previous = this.environment;
+
+    try {
+      this.environment = env;
+
+      statements.forEach((stmt) => this.execute(stmt));
+    } finally {
+      this.environment = previous;
+    }
   }
 
   visitBinaryExpr(expr: Expr.Binary): NullableObj {
@@ -104,6 +116,12 @@ export class Interpreter
     return this.environment.get(expr.name);
   }
 
+  visitAssignExpr(expr: Expr.Assign): NullableObj {
+    const value = this.evaluate(expr.value);
+    this.environment.assign(expr.name, value);
+    return value;
+  }
+
   private evaluate(expr: Expr.Expr): NullableObj {
     return expr.accept(this);
   }
@@ -126,10 +144,8 @@ export class Interpreter
     this.environment.define(stmt.name.lexeme, value);
   }
 
-  visitAssignExpr(expr: Expr.Assign): NullableObj {
-    const value = this.evaluate(expr.value);
-    this.environment.assign(expr.name, value);
-    return value;
+  visitBlockStmt(stmt: Stmt.BlockStmt): void {
+    this.executeBlock(stmt.statements, new Environment(this.environment));
   }
 
   private isTruthy(object: NullableObj): boolean {
@@ -184,9 +200,6 @@ export class Interpreter
 
   // Statements
 
-  visitBlockStmt(stmt: Stmt.BlockStmt): void {
-    throw new Error('Method not implemented.');
-  }
   visitClassStmt(stmt: Stmt.ClassStmt): void {
     throw new Error('Method not implemented.');
   }
