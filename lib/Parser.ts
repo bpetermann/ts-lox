@@ -32,6 +32,7 @@ export class Parser {
   private statement(): Statement {
     if (this.match(TT.IF)) return this.ifStatement();
     if (this.match(TT.PRINT)) return this.printStatement();
+    if (this.match(TT.WHILE)) return this.whileStatement();
     if (this.match(TT.LEFT_BRACE)) return new Stmt.BlockStmt(this.block());
 
     return this.expressionStatement();
@@ -85,6 +86,15 @@ export class Parser {
 
     this.consume(TT.SEMICOLON, "Expect ';' after variable declaration.");
     return new Stmt.VarStmt(name, initializer);
+  }
+
+  private whileStatement(): Stmt.WhileStmt {
+    this.consume(TT.LEFT_PAREN, "Expect '(' after 'while'.");
+    const condition = this.expression();
+    this.consume(TT.RIGHT_PAREN, "Expect ')' after condition.");
+    const body = this.statement();
+
+    return new Stmt.WhileStmt(condition, body);
   }
 
   private expression(): Expression {

@@ -166,6 +166,12 @@ export class Interpreter
     this.environment.define(stmt.name.lexeme, value);
   }
 
+  visitWhileStmt(stmt: Stmt.WhileStmt): void {
+    while (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.body);
+    }
+  }
+
   visitBlockStmt(stmt: Stmt.BlockStmt): void {
     this.executeBlock(stmt.statements, new Environment(this.environment));
   }
@@ -240,10 +246,6 @@ export class Interpreter
   }
 
   visitReturnStmt(stmt: Stmt.ReturnStmt): void {
-    throw new Error('Method not implemented.');
-  }
-
-  visitWhileStmt(stmt: Stmt.WhileStmt): void {
     throw new Error('Method not implemented.');
   }
 }

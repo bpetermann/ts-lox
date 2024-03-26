@@ -93,8 +93,15 @@ class VarStmt extends Stmt {
 }
 
 class WhileStmt extends Stmt {
+  constructor(
+    public readonly condition: Expr.Expr,
+    public readonly body: Stmt
+  ) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitWhileStmt(this);
   }
 }
 
