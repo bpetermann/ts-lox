@@ -14,11 +14,13 @@ const readEvalPrint = (source: string): void => {
   interpreter.interpret(expression);
 };
 
+const cleanString = (input: string) => new RegExp(input.replace(/\n/g, '\\s*'));
+
 describe('Test interpretor visitor class', () => {
   let logSpy: jest.SpyInstance | undefined;
 
   beforeEach(() => {
-    logSpy = jest.spyOn(global.console, 'log');
+    logSpy = jest.spyOn(global.console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -36,7 +38,7 @@ describe('Test interpretor visitor class', () => {
     input.forEach(([source, expected]) => {
       readEvalPrint(source);
 
-      expect(logSpy).toHaveBeenCalledWith(expected);
+      expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
     });
   });
 
@@ -45,7 +47,7 @@ describe('Test interpretor visitor class', () => {
     const expected = '11';
 
     readEvalPrint(input);
-    expect(logSpy).toHaveBeenCalledWith(expected);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
 
   test('should not evaluate 0 to nil', () => {
@@ -53,7 +55,7 @@ describe('Test interpretor visitor class', () => {
     const expected = '1';
 
     readEvalPrint(input);
-    expect(logSpy).toHaveBeenCalledWith(expected);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
 
   test('dividing by zero should result in an error', () => {
@@ -72,6 +74,6 @@ describe('Test interpretor visitor class', () => {
     const expected = '5';
 
     readEvalPrint(input);
-    expect(logSpy).toHaveBeenCalledWith(expected);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
 });

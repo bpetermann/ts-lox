@@ -6,6 +6,7 @@ import Lox from './Lox.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
+import colors from 'colors';
 
 export class Interpreter
   implements Expr.Visitor<NullableObj>, Stmt.Visitor<void>
@@ -15,7 +16,7 @@ export class Interpreter
   public interpret(statements: Array<Statement>): void {
     try {
       statements.forEach((stmt) => {
-        if (stmt) this.execute(stmt);
+        this.execute(stmt);
       });
     } catch (err) {
       Lox.runtimeError(err);
@@ -127,7 +128,8 @@ export class Interpreter
   }
 
   visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
-    this.evaluate(stmt.expression);
+    const evalExpression = this.evaluate(stmt.expression);
+    this.displayExpression(evalExpression);
   }
 
   visitPrintStmt(stmt: Stmt.PrintStmt): void {
@@ -146,6 +148,10 @@ export class Interpreter
 
   visitBlockStmt(stmt: Stmt.BlockStmt): void {
     this.executeBlock(stmt.statements, new Environment(this.environment));
+  }
+
+  private displayExpression(object: NullableObj) {
+    console.log(this.stringify(object));
   }
 
   private isTruthy(object: NullableObj): boolean {
@@ -169,8 +175,17 @@ export class Interpreter
   }
 
   private stringify(object: NullableObj): string {
-    if (object === null) return 'nil';
-    return object.toString();
+    if (object === null) return colors.magenta('nil');
+    switch (typeof object) {
+      case 'string':
+        return colors.cyan(object.toString());
+      case 'number':
+        return colors.green(object.toString());
+      case 'boolean':
+        return colors.blue(object.toString());
+      default:
+        return object.toString();
+    }
   }
 
   // Expressions
