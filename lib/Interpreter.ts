@@ -140,8 +140,7 @@ export class Interpreter
   }
 
   visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
-    const evalExpression = this.evaluate(stmt.expression);
-    this.displayExpression(evalExpression);
+    this.evaluate(stmt.expression);
   }
 
   visitIfStmt(stmt: Stmt.IfStmt): void {

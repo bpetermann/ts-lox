@@ -77,7 +77,7 @@ describe('Test interpretor visitor class', () => {
 
   test('conditional statements', () => {
     const input: [string, string][] = [
-      [`if(1 < 3) true; else false;`, 'true'],
+      [`if(1 < 3) print true; else print false;`, 'true'],
       [`print "hi" or 2; `, 'hi'],
       [`print nil or "yes";`, 'yes'],
     ];
@@ -87,5 +87,17 @@ describe('Test interpretor visitor class', () => {
 
       expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
     });
+  });
+
+  test('for loop', () => {
+    const input = `
+    var a = 5;
+    for (var a = 5; a > 0; a = a - 1) {
+      print a;
+    }`;
+    const expected = '1';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
 });

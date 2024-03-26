@@ -30,12 +30,53 @@ export class Parser {
   }
 
   private statement(): Statement {
+    if (this.match(TT.FOR)) return this.forStatement();
     if (this.match(TT.IF)) return this.ifStatement();
     if (this.match(TT.PRINT)) return this.printStatement();
     if (this.match(TT.WHILE)) return this.whileStatement();
     if (this.match(TT.LEFT_BRACE)) return new Stmt.BlockStmt(this.block());
 
     return this.expressionStatement();
+  }
+
+  private forStatement(): Statement {
+    this.consume(TT.LEFT_PAREN, "Expect '(' after 'for'.");
+
+    let initializer: Statement | null = null;
+    if (this.match(TT.SEMICOLON)) {
+      initializer = null;
+    } else if (this.match(TT.VAR)) {
+      initializer = this.varDeclaration();
+    } else {
+      initializer = this.expressionStatement();
+    }
+
+    let condition: Expression | null = null;
+    if (!this.check(TT.SEMICOLON)) {
+      condition = this.expression();
+    }
+    this.consume(TT.SEMICOLON, "Expect ';' after loop condition.");
+
+    let increment: Expression | null = null;
+    if (!this.check(TT.RIGHT_PAREN)) {
+      increment = this.expression();
+    }
+    this.consume(TT.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    let body = this.statement();
+
+    if (increment) {
+      body = new Stmt.BlockStmt([body, new Stmt.ExpressionStmt(increment)]);
+    }
+    if (condition === null) condition = new Expr.Literal(true);
+
+    body = new Stmt.WhileStmt(condition, body);
+
+    if (initializer) {
+      body = new Stmt.BlockStmt([initializer, body]);
+    }
+
+    return body;
   }
 
   private ifStatement(): Statement {
