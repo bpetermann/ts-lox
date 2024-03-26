@@ -18,8 +18,12 @@ interface Visitor<T> {
 }
 
 class BlockStmt extends Stmt {
+  constructor(public readonly statements: Array<Stmt>) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitBlockStmt(this);
   }
 }
 

@@ -3,9 +3,9 @@ import { Scanner } from '../Scanner';
 import { Parser } from '../Parser';
 import { AstPrinter } from '../AstPrinter';
 import { ExpressionStmt } from '../Stmt';
-import { NullableStmt } from '../@types';
+import { Statement } from '../@types';
 
-const parse = (source: string): NullableStmt[] => {
+const parse = (source: string): Statement[] => {
   const scanner = new Scanner(source);
   const tokens = scanner.scanTokens();
   const parser = new Parser(tokens);

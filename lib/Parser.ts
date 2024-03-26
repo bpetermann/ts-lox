@@ -1,4 +1,4 @@
-import { Expression, NullableStmt, Statement } from './@types/index.js';
+import { Expression, Statement } from './@types/index.js';
 import { ParseError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
@@ -10,27 +10,28 @@ export class Parser {
   private current: number = 0;
   constructor(private readonly tokens: Array<Token>) {}
 
-  parse(): Array<NullableStmt> {
-    const statements: NullableStmt[] = [];
+  parse(): Array<Statement> {
+    const statements: Statement[] = [];
     while (!this.isAtEnd()) {
-      statements.push(this.declaration());
+      const statement = this.declaration();
+      if (statement) statements.push(statement);
     }
 
     return statements;
   }
 
-  private declaration(): NullableStmt {
+  private declaration(): Statement | undefined {
     try {
       if (this.match(TT.VAR)) return this.varDeclaration();
       return this.statement();
     } catch (err) {
       this.synchronize();
-      return null;
     }
   }
 
   private statement(): Statement {
     if (this.match(TT.PRINT)) return this.printStatement();
+    if (this.match(TT.LEFT_BRACE)) return new Stmt.BlockStmt(this.block());
 
     return this.expressionStatement();
   }
@@ -39,6 +40,18 @@ export class Parser {
     const expr = this.expression();
     this.consume(TT.SEMICOLON, "Expect ';' after value.");
     return new Stmt.ExpressionStmt(expr);
+  }
+
+  private block(): Array<Statement> {
+    const statements: Array<Statement> = [];
+
+    while (!this.check(TT.RIGHT_BRACE) && !this.isAtEnd()) {
+      const statement = this.declaration();
+      if (statement) statements.push(statement);
+    }
+
+    this.consume(TT.RIGHT_BRACE, "Expect '}' after block.");
+    return statements;
   }
 
   private printStatement(): Statement {
