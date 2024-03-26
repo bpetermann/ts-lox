@@ -7,6 +7,8 @@ import { TokenType } from './TokenType.js';
 import { Parser } from './Parser.js';
 import { RuntimeError } from './Error.js';
 import { Interpreter } from './Interpreter.js';
+import { Stmt } from './Stmt.js';
+import { Expr } from './Expr.js';
 
 type ExitCode = 0 | 7;
 export default class Lox {
@@ -64,11 +66,12 @@ export default class Lox {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens);
-    const statements = parser.parse();
+    const syntax = parser.parseRepl();
 
     if (Lox.hadError) return;
 
-    this.interpreter.interpret(statements);
+    const result = this.interpreter.interpret(syntax);
+    if (result) console.log(`= ${result}`);
   }
 
   private exit(code: ExitCode): void {

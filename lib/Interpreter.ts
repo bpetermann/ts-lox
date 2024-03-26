@@ -1,4 +1,4 @@
-import { NullableObj, Statement } from './@types/index.js';
+import { Expression, NullableObj, Statement } from './@types/index.js';
 import Environment from './Environment.js';
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
@@ -13,14 +13,25 @@ export class Interpreter
 {
   constructor(private environment: Environment = new Environment()) {}
 
-  public interpret(statements: Array<Statement>): void {
+  public interpret(input: Array<Statement> | Expression): string | void {
     try {
-      statements.forEach((stmt) => {
-        this.execute(stmt);
-      });
+      return input instanceof Array
+        ? this.interpretStmt(input)
+        : this.interpretExpr(input);
     } catch (err) {
       Lox.runtimeError(err);
     }
+  }
+
+  private interpretStmt(statements: Array<Statement>): void {
+    statements.forEach((stmt) => {
+      this.execute(stmt);
+    });
+  }
+
+  private interpretExpr(expression: Expression): string {
+    const value = this.evaluate(expression);
+    return this.stringify(value);
   }
 
   private execute(stmt: Statement): void {

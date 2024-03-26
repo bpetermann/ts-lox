@@ -8,7 +8,28 @@ import * as Stmt from './Stmt.js';
 
 export class Parser {
   private current: number = 0;
+  private allowExpression: boolean = false;
+  private foundExpression: boolean = false;
+
   constructor(private readonly tokens: Array<Token>) {}
+
+  parseRepl(): Array<Statement> | Expression {
+    this.allowExpression = true;
+
+    const statements: Statement[] = [];
+    while (!this.isAtEnd()) {
+      const statement = this.declaration();
+      if (statement) statements.push(statement);
+      if (this.foundExpression) {
+        const last = statements[statements.length - 1];
+        return (last as Stmt.ExpressionStmt).expression;
+      }
+
+      this.allowExpression = false;
+    }
+
+    return statements;
+  }
 
   parse(): Array<Statement> {
     const statements: Statement[] = [];
@@ -95,7 +116,13 @@ export class Parser {
 
   private expressionStatement(): Statement {
     const expr = this.expression();
-    this.consume(TT.SEMICOLON, "Expect ';' after value.");
+
+    if (this.allowExpression && this.isAtEnd()) {
+      this.foundExpression = true;
+    } else {
+      this.consume(TT.SEMICOLON, "Expect ';' after value.");
+    }
+
     return new Stmt.ExpressionStmt(expr);
   }
 
