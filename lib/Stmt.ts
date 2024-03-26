@@ -50,8 +50,16 @@ class FunctionStmt extends Stmt {
 }
 
 class IfStmt extends Stmt {
+  constructor(
+    public readonly condition: Expr.Expr,
+    public readonly thenBranch: Stmt,
+    public readonly elseBranch: Stmt | null
+  ) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitIfStmt(this);
   }
 }
 

@@ -132,6 +132,14 @@ export class Interpreter
     this.displayExpression(evalExpression);
   }
 
+  visitIfStmt(stmt: Stmt.IfStmt): void {
+    if (this.isTruthy(this.evaluate(stmt.condition))) {
+      this.execute(stmt.thenBranch);
+    } else if (stmt.elseBranch) {
+      this.execute(stmt.elseBranch);
+    }
+  }
+
   visitPrintStmt(stmt: Stmt.PrintStmt): void {
     const value = this.evaluate(stmt.expression);
     console.log(this.stringify(value));
@@ -220,9 +228,6 @@ export class Interpreter
   }
 
   visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
-    throw new Error('Method not implemented.');
-  }
-  visitIfStmt(stmt: Stmt.IfStmt): void {
     throw new Error('Method not implemented.');
   }
 

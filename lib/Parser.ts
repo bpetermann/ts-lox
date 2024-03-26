@@ -30,10 +30,25 @@ export class Parser {
   }
 
   private statement(): Statement {
+    if (this.match(TT.IF)) return this.ifStatement();
     if (this.match(TT.PRINT)) return this.printStatement();
     if (this.match(TT.LEFT_BRACE)) return new Stmt.BlockStmt(this.block());
 
     return this.expressionStatement();
+  }
+
+  private ifStatement(): Statement {
+    this.consume(TT.LEFT_PAREN, "Expect '(' after 'if'.");
+    const condition = this.expression();
+    this.consume(TT.RIGHT_PAREN, "Expect ')' after if condition.");
+
+    const thenBranch = this.statement();
+    let elseBranch: Statement | null = null;
+    if (this.match(TT.ELSE)) {
+      elseBranch = this.statement();
+    }
+
+    return new Stmt.IfStmt(condition, thenBranch, elseBranch);
   }
 
   private expressionStatement(): Statement {
