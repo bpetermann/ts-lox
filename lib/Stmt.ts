@@ -44,8 +44,16 @@ class ExpressionStmt extends Stmt {
 }
 
 class FunctionStmt extends Stmt {
+  constructor(
+    public readonly name: Token,
+    public readonly params: Array<Token>,
+    public readonly body: Array<Stmt>
+  ) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitFunctionStmt(this);
   }
 }
 

@@ -3,6 +3,8 @@ import Environment from './Environment.js';
 import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
+import { LoxCallable, Clock } from './LoxCallble.js';
+import { LoxFunction } from './LoxFunction.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
@@ -11,11 +13,16 @@ import colors from 'colors';
 export class Interpreter
   implements Expr.Visitor<NullableObj>, Stmt.Visitor<void>
 {
-  constructor(private environment: Environment = new Environment()) {}
+  readonly globals: Environment = new Environment();
+  private environment: Environment = this.globals;
+
+  constructor() {
+    this.globals.define('clock', new Clock());
+  }
 
   public interpret(input: Array<Statement> | Expression): string | void {
     try {
-      return input instanceof Array
+      return Array.isArray(input)
         ? this.interpretStmt(input)
         : this.interpretExpr(input);
     } catch (err) {
@@ -24,9 +31,7 @@ export class Interpreter
   }
 
   private interpretStmt(statements: Array<Statement>): void {
-    statements.forEach((stmt) => {
-      this.execute(stmt);
-    });
+    statements.forEach((stmt) => this.execute(stmt));
   }
 
   private interpretExpr(expression: Expression): string {
@@ -103,6 +108,33 @@ export class Interpreter
     return null;
   }
 
+  visitCallExpr(expr: Expr.Call): NullableObj {
+    const callee = this.evaluate(expr.callee);
+
+    const args: Array<NullableObj> = [];
+    expr.args.forEach((arg) => args.push(this.evaluate(arg)));
+
+    if (!this.isCallable(callee)) {
+      throw new RuntimeError(
+        expr.paren,
+        'Can only call functions and classes.'
+      );
+    }
+
+    const func = callee as LoxCallable;
+    if (args.length !== func.arity) {
+      throw new RuntimeError(
+        expr.paren,
+        `Expected ${func.arity} arguments but got ${args.length}.`
+      );
+    }
+    return func.call(this, args);
+  }
+
+  isCallable(callee: NullableObj): callee is LoxCallable {
+    return (callee as LoxCallable).call !== undefined;
+  }
+
   visitGroupingExpr(expr: Expr.Grouping): NullableObj {
     return this.evaluate(expr.expression);
   }
@@ -154,6 +186,11 @@ export class Interpreter
     this.evaluate(stmt.expression);
   }
 
+  visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
+    const func = new LoxFunction(stmt);
+    this.environment.define(stmt.name.lexeme, func);
+  }
+
   visitIfStmt(stmt: Stmt.IfStmt): void {
     if (this.isTruthy(this.evaluate(stmt.condition))) {
       this.execute(stmt.thenBranch);
@@ -184,10 +221,6 @@ export class Interpreter
 
   visitBlockStmt(stmt: Stmt.BlockStmt): void {
     this.executeBlock(stmt.statements, new Environment(this.environment));
-  }
-
-  private displayExpression(object: NullableObj) {
-    console.log(this.stringify(object));
   }
 
   private isTruthy(object: NullableObj): boolean {
@@ -225,10 +258,6 @@ export class Interpreter
   }
 
   // Expressions
-  visitCallExpr(expr: Expr.Call): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
   visitGetExpr(expr: Expr.Get): NullableObj {
     throw new Error('Method not implemented.');
   }
@@ -248,10 +277,6 @@ export class Interpreter
   // Statements
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
-    throw new Error('Method not implemented.');
-  }
-
-  visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
     throw new Error('Method not implemented.');
   }
 

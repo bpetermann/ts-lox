@@ -43,6 +43,7 @@ export class Parser {
 
   private declaration(): Statement | undefined {
     try {
+      if (this.match(TT.FUN)) return this.func('function');
       if (this.match(TT.VAR)) return this.varDeclaration();
       return this.statement();
     } catch (err) {
@@ -124,6 +125,27 @@ export class Parser {
     }
 
     return new Stmt.ExpressionStmt(expr);
+  }
+
+  private func(kind: string): Stmt.FunctionStmt {
+    const name = this.consume(TT.IDENTIFIER, `Expect ${kind} name.`);
+    this.consume(TT.LEFT_PAREN, `Expect '(' after ${kind} name.`);
+    const parameters: Array<Token> = [];
+    if (!this.check(TT.RIGHT_PAREN)) {
+      do {
+        if (parameters.length >= 255) {
+          this.ParseError(this.peek(), "Can't have more than 255 parameters.");
+        }
+
+        parameters.push(this.consume(TT.IDENTIFIER, 'Expect parameter name.'));
+      } while (this.match(TT.COMMA));
+    }
+    this.consume(TT.RIGHT_PAREN, "Expect ')' after parameters.");
+
+    this.consume(TT.LEFT_BRACE, `Expect '{' before  ${kind} body.`);
+    const body = this.block();
+    
+    return new Stmt.FunctionStmt(name, parameters, body);
   }
 
   private block(): Array<Statement> {
@@ -266,7 +288,38 @@ export class Parser {
       return new Expr.Unary(operator, right);
     }
 
-    return this.primary();
+    return this.call();
+  }
+
+  private finishCall(callee: Expression) {
+    const args: Expression[] = [];
+
+    if (!this.check(TT.RIGHT_PAREN)) {
+      do {
+        if (args.length >= 255) {
+          this.ParseError(this.peek(), "Can't have more than 255 arguments.");
+        }
+        args.push(this.expression());
+      } while (this.match(TT.COMMA));
+    }
+
+    const paren = this.consume(TT.RIGHT_PAREN, "Expect ')' after arguments.");
+
+    return new Expr.Call(callee, paren, args);
+  }
+
+  private call() {
+    let expr = this.primary();
+
+    while (true) {
+      if (this.match(TT.LEFT_PAREN)) {
+        expr = this.finishCall(expr);
+      } else {
+        break;
+      }
+    }
+
+    return expr;
   }
 
   private primary(): Expression {
