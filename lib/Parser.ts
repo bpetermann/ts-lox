@@ -43,7 +43,10 @@ export class Parser {
 
   private declaration(): Statement | undefined {
     try {
-      if (this.match(TT.FUN)) return this.func('function');
+      if (this.check(TT.FUN) && this.checkNext(TT.IDENTIFIER)) {
+        this.consume(TT.FUN, '');
+        return this.func('function');
+      }
       if (this.match(TT.VAR)) return this.varDeclaration();
       return this.statement();
     } catch (err) {
@@ -130,12 +133,16 @@ export class Parser {
 
   private func(kind: string): Stmt.FunctionStmt {
     const name = this.consume(TT.IDENTIFIER, `Expect ${kind} name.`);
+    return new Stmt.FunctionStmt(name, this.functionBody(kind));
+  }
+
+  private functionBody(kind: string): Expr.Function {
     this.consume(TT.LEFT_PAREN, `Expect '(' after ${kind} name.`);
     const parameters: Array<Token> = [];
     if (!this.check(TT.RIGHT_PAREN)) {
       do {
-        if (parameters.length >= 255) {
-          this.ParseError(this.peek(), "Can't have more than 255 parameters.");
+        if (parameters.length >= 8) {
+          this.ParseError(this.peek(), "Can't have more than 8 parameters.");
         }
 
         parameters.push(this.consume(TT.IDENTIFIER, 'Expect parameter name.'));
@@ -146,7 +153,7 @@ export class Parser {
     this.consume(TT.LEFT_BRACE, `Expect '{' before  ${kind} body.`);
     const body = this.block();
 
-    return new Stmt.FunctionStmt(name, parameters, body);
+    return new Expr.Function(parameters, body);
   }
 
   private block(): Array<Statement> {
@@ -338,6 +345,7 @@ export class Parser {
   private primary(): Expression {
     if (this.match(TT.FALSE)) return new Expr.Literal(false);
     if (this.match(TT.TRUE)) return new Expr.Literal(true);
+    if (this.match(TT.FUN)) return this.functionBody('function');
     if (this.match(TT.NIL)) return new Expr.Literal(null);
     if (this.match(TT.NUMBER, TT.STRING))
       return new Expr.Literal(this.previous().literal);
@@ -360,6 +368,12 @@ export class Parser {
     }
 
     return false;
+  }
+
+  private checkNext(tokenType: TT) {
+    if (this.isAtEnd()) return false;
+    if (this.tokens[this.current + 1].type === TT.EOF) return false;
+    return this.tokens[this.current + 1].type === tokenType;
   }
 
   private consume(type: TT, message: string): Token {

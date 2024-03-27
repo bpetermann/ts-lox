@@ -3,13 +3,14 @@ import Environment from './Environment.js';
 import { Interpreter } from './Interpreter.js';
 import { LoxCallable } from './LoxCallble.js';
 import { Return } from './Return.js';
-import * as Stmt from './Stmt.js';
+import * as Expr from './Expr.js';
 
 export class LoxFunction implements LoxCallable {
   public readonly arity: number;
 
   constructor(
-    public readonly declaration: Stmt.FunctionStmt,
+    public readonly name: string | null,
+    public readonly declaration: Expr.Function,
     public readonly closure: Environment
   ) {
     this.arity = declaration.params.length;
@@ -31,6 +32,7 @@ export class LoxFunction implements LoxCallable {
   }
 
   toString(): string {
-    return `<fn ${this.declaration.name.lexeme}>`;
+    if (!this.name) return '<fn>';
+    return `<fn ${this.name}>`;
   }
 }

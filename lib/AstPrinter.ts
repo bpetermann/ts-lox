@@ -46,6 +46,9 @@ export class AstPrinter implements Expr.Visitor<string> {
   visitVariableExpr(_: Expr.Variable): string {
     throw new Error('Method not implemented.');
   }
+  visitFunctionExpr(expr: Expr.Function): string {
+    throw new Error('Method not implemented.');
+  }
 
   private parenthesize(name: string, ...args: Expr.Expr[]): string {
     return `(${name} ${args.map((exp) => exp.accept(this)).join(' ')})`;

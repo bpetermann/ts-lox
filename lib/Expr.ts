@@ -1,4 +1,4 @@
-import { NullableObj } from './@types/index.js';
+import { NullableObj, Statement } from './@types/index.js';
 import { Token } from './Token.js';
 
 abstract class Expr {
@@ -18,6 +18,7 @@ interface Visitor<T> {
   visitThisExpr(expr: This): T;
   visitUnaryExpr(expr: Unary): T;
   visitVariableExpr(expr: Variable): T;
+  visitFunctionExpr(expr: Function): T;
 }
 
 class Assign extends Expr {
@@ -147,6 +148,18 @@ class Variable extends Expr {
   }
 }
 
+class Function extends Expr {
+  constructor(
+    public readonly params: Array<Token>,
+    public readonly body: Array<Statement>
+  ) {
+    super();
+  }
+  override accept<T>(visitor: Visitor<T>): T {
+    return visitor.visitFunctionExpr(this);
+  }
+}
+
 export {
   Expr,
   Visitor,
@@ -162,4 +175,5 @@ export {
   This,
   Unary,
   Variable,
+  Function,
 };

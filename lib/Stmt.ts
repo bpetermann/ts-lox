@@ -46,8 +46,7 @@ class ExpressionStmt extends Stmt {
 class FunctionStmt extends Stmt {
   constructor(
     public readonly name: Token,
-    public readonly params: Array<Token>,
-    public readonly body: Array<Stmt>
+    public readonly func: Expr.Function
   ) {
     super();
   }

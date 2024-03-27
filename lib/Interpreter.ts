@@ -179,6 +179,10 @@ export class Interpreter
     return value;
   }
 
+  visitFunctionExpr(expr: Expr.Function): NullableObj {
+    return new LoxFunction(null, expr, this.environment);
+  }
+
   private evaluate(expr: Expr.Expr): NullableObj {
     return expr.accept(this);
   }
@@ -188,8 +192,11 @@ export class Interpreter
   }
 
   visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
-    const func = new LoxFunction(stmt, this.environment);
-    this.environment.define(stmt.name.lexeme, func);
+    const fnName = stmt.name.lexeme;
+    this.environment.define(
+      fnName,
+      new LoxFunction(fnName, stmt.func, this.environment)
+    );
   }
 
   visitIfStmt(stmt: Stmt.IfStmt): void {
