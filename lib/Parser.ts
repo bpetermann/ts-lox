@@ -54,6 +54,7 @@ export class Parser {
   private statement(): Statement {
     if (this.match(TT.FOR)) return this.forStatement();
     if (this.match(TT.IF)) return this.ifStatement();
+    if (this.match(TT.RETURN)) return this.returnStatement();
     if (this.match(TT.PRINT)) return this.printStatement();
     if (this.match(TT.WHILE)) return this.whileStatement();
     if (this.match(TT.LEFT_BRACE)) return new Stmt.BlockStmt(this.block());
@@ -144,7 +145,7 @@ export class Parser {
 
     this.consume(TT.LEFT_BRACE, `Expect '{' before  ${kind} body.`);
     const body = this.block();
-    
+
     return new Stmt.FunctionStmt(name, parameters, body);
   }
 
@@ -164,6 +165,18 @@ export class Parser {
     const value = this.expression();
     this.consume(TT.SEMICOLON, "Expect ';' after value.");
     return new Stmt.PrintStmt(value);
+  }
+
+  private returnStatement() {
+    const keyword = this.previous();
+    let value: Expression | null = null;
+
+    if (!this.check(TT.SEMICOLON)) {
+      value = this.expression();
+    }
+
+    this.consume(TT.SEMICOLON, "Expect ';' after return value.");
+    return new Stmt.ReturnStmt(keyword, value);
   }
 
   private varDeclaration(): Statement {

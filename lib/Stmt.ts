@@ -82,8 +82,14 @@ class PrintStmt extends Stmt {
 }
 
 class ReturnStmt extends Stmt {
+  constructor(
+    public readonly keyword: Token,
+    public readonly value: Expr.Expr | null
+  ) {
+    super();
+  }
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitReturnStmt(this);
   }
 }
 

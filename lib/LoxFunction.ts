@@ -2,6 +2,7 @@ import { NullableObj } from './@types';
 import Environment from './Environment.js';
 import { Interpreter } from './Interpreter.js';
 import { LoxCallable } from './LoxCallble.js';
+import { Return } from './Return.js';
 import * as Stmt from './Stmt.js';
 
 export class LoxFunction implements LoxCallable {
@@ -18,7 +19,11 @@ export class LoxFunction implements LoxCallable {
       environment.define(p.lexeme, args[i])
     );
 
-    interpreter.executeBlock(this.declaration.body, environment);
+    try {
+      interpreter.executeBlock(this.declaration.body, environment);
+    } catch (returnValue: any) {
+      return returnValue instanceof Return ? returnValue.value : null;
+    }
     return null;
   }
 

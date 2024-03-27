@@ -5,6 +5,7 @@ import * as Expr from './Expr.js';
 import Lox from './Lox.js';
 import { LoxCallable, Clock } from './LoxCallble.js';
 import { LoxFunction } from './LoxFunction.js';
+import { Return } from './Return.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 import { TokenType as TT } from './TokenType.js';
@@ -204,6 +205,13 @@ export class Interpreter
     console.log(this.stringify(value));
   }
 
+  visitReturnStmt(stmt: Stmt.ReturnStmt): void {
+    let value: NullableObj = null;
+    if (stmt.value) value = this.evaluate(stmt.value);
+
+    throw new Return(value);
+  }
+
   visitVarStmt(stmt: Stmt.VarStmt): void {
     let value: NullableObj = null;
     if (stmt.initializer !== null) {
@@ -277,10 +285,6 @@ export class Interpreter
   // Statements
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
-    throw new Error('Method not implemented.');
-  }
-
-  visitReturnStmt(stmt: Stmt.ReturnStmt): void {
     throw new Error('Method not implemented.');
   }
 }
