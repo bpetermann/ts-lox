@@ -255,7 +255,7 @@ export class Interpreter
     if (object === null || object === 'nil') return colors.magenta('nil');
     switch (typeof object) {
       case 'string':
-        return colors.cyan(`"${object.toString()}"`);
+        return colors.cyan(object.toString());
       case 'number':
         return colors.green(object.toString());
       case 'boolean':

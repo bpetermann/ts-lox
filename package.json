@@ -9,6 +9,7 @@
     "fresh": "npm i && npm run build",
     "build:start": "npm run build && npm start",
     "bookmark": "npm run build && node ./app/bookmark.js",
+    "benchmark": "npm run build && npm start benchmark.lox",
     "test": "jest --runInBand --detectOpenHandles --forceExit",
     "prepare": "husky"
   },

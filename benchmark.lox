@@ -1,0 +1,10 @@
+var start = clock();
+fun fib(n) {
+  if (n <= 1) return n;
+  return fib(n - 2) + fib(n - 1);
+}
+var result = fib(35);
+var end = clock();
+print "🧪 execute fibonacci 35 times in...";
+var time = (end - start) / 1000;
+print time + " s";
