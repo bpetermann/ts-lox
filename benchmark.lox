@@ -1,10 +1,12 @@
-var start = clock();
 fun fib(n) {
-  if (n <= 1) return n;
-  return fib(n - 2) + fib(n - 1);
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2); 
 }
-var result = fib(35);
-var end = clock();
-print "🧪 execute fibonacci 35 times in...";
-var time = (end - start) / 1000;
+
+var before = clock();
+fib(40);
+var after = clock();
+var time = (after - before) / 1000;
+
+print "🧪 execute fibonacci 40 times in...";
 print time + " s";

@@ -1,3 +1,4 @@
+import { NullableObj } from './@types';
 import * as Expr from './Expr';
 
 export class AstPrinter implements Expr.Visitor<string> {
@@ -22,7 +23,11 @@ export class AstPrinter implements Expr.Visitor<string> {
     return this.parenthesize(expr.operator.lexeme, expr.right);
   }
 
-  visitAssignExpr(_: Expr.Assign): string {
+  private parenthesize(name: string, ...args: Expr.Expr[]): string {
+    return `(${name} ${args.map((exp) => exp.accept(this)).join(' ')})`;
+  }
+
+  visitAssignExpr(expr: Expr.Assign): string {
     throw new Error('Method not implemented.');
   }
   visitCallExpr(_: Expr.Call): string {
@@ -48,9 +53,5 @@ export class AstPrinter implements Expr.Visitor<string> {
   }
   visitFunctionExpr(expr: Expr.Function): string {
     throw new Error('Method not implemented.');
-  }
-
-  private parenthesize(name: string, ...args: Expr.Expr[]): string {
-    return `(${name} ${args.map((exp) => exp.accept(this)).join(' ')})`;
   }
 }
