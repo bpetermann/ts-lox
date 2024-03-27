@@ -188,7 +188,7 @@ export class Interpreter
   }
 
   visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
-    const func = new LoxFunction(stmt);
+    const func = new LoxFunction(stmt, this.environment);
     this.environment.define(stmt.name.lexeme, func);
   }
 

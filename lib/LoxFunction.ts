@@ -8,12 +8,15 @@ import * as Stmt from './Stmt.js';
 export class LoxFunction implements LoxCallable {
   public readonly arity: number;
 
-  constructor(public readonly declaration: Stmt.FunctionStmt) {
+  constructor(
+    public readonly declaration: Stmt.FunctionStmt,
+    public readonly closure: Environment
+  ) {
     this.arity = declaration.params.length;
   }
 
   call(interpreter: Interpreter, args: NullableObj[]): NullableObj {
-    const environment = new Environment(interpreter.globals);
+    const environment = new Environment(this.closure);
 
     this.declaration.params.forEach((p, i) =>
       environment.define(p.lexeme, args[i])
