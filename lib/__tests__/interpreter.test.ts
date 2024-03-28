@@ -1,17 +1,8 @@
 import { expect } from '@jest/globals';
-import { Scanner } from '../Scanner';
-import { Parser } from '../Parser';
-import { Interpreter } from '../Interpreter';
+import Lox from '../Lox';
 
 const readEvalPrint = (source: string): void => {
-  const scanner = new Scanner(source);
-  const tokens = scanner.scanTokens();
-
-  const parser = new Parser(tokens);
-  const expression = parser.parse();
-
-  const interpreter = new Interpreter();
-  interpreter.interpret(expression);
+  Lox.getInstance().run(source);
 };
 
 describe('Test interpretor visitor class', () => {
@@ -91,10 +82,17 @@ describe('Test interpretor visitor class', () => {
 
   test('for loop', () => {
     const input = `
-    var a = 5;
     for (var a = 5; a > 0; a = a - 1) {
       print a;
     }`;
+    const expected = '1';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
+  });
+
+  test('nested function call', () => {
+    const input = `fun makeCounter() {  var i = 0;  fun count() {    i = i + 1;    print i;  }  return count;}var counter = makeCounter(); counter();`;
     const expected = '1';
 
     readEvalPrint(input);
