@@ -16,6 +16,7 @@ export class Interpreter
 {
   readonly globals: Environment = new Environment();
   private environment: Environment = this.globals;
+  private locals: Map<Expression, number> = new Map();
 
   constructor() {
     this.globals.define('clock', new Clock());
@@ -42,6 +43,10 @@ export class Interpreter
 
   private execute(stmt: Statement): void {
     stmt.accept(this);
+  }
+
+  resolve(expr: Expression, depth: number) {
+    this.locals.set(expr, depth);
   }
 
   executeBlock(statements: Array<Statement>, env: Environment): void {
@@ -129,6 +134,7 @@ export class Interpreter
         `Expected ${func.arity} arguments but got ${args.length}.`
       );
     }
+
     return func.call(this, args);
   }
 
@@ -170,12 +176,28 @@ export class Interpreter
   }
 
   visitVariableExpr(expr: Expr.Variable): NullableObj {
-    return this.environment.get(expr.name);
+    return this.lookUpVariable(expr.name, expr);
+  }
+
+  private lookUpVariable(name: Token, expr: Expression): NullableObj {
+    const distance = this.locals.get(expr);
+    if (distance !== undefined) {
+      return this.environment.getAt(distance, name.lexeme);
+    } else {
+      return this.globals.get(name);
+    }
   }
 
   visitAssignExpr(expr: Expr.Assign): NullableObj {
     const value = this.evaluate(expr.value);
-    this.environment.assign(expr.name, value);
+
+    const distance = this.locals.get(expr);
+    if (distance !== undefined) {
+      this.environment.assignAt(distance, expr.name, value);
+    } else {
+      this.globals.assign(expr.name, value);
+    }
+
     return value;
   }
 

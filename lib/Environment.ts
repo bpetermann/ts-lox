@@ -13,6 +13,19 @@ export default class Environment {
     this.values.set(name, value);
   }
 
+  getAt(distance: number, name: string): NullableObj {
+    return this.ancestor(distance).values.get(name) ?? null;
+  }
+
+  ancestor(distance: number): Environment {
+    let environment: Environment = this;
+
+    for (let i = 0; i < distance; i++) {
+      environment = environment.enclosing!;
+    }
+    return environment;
+  }
+
   get(name: Token): NullableObj {
     if (this.values.has(name.lexeme)) {
       return this.values.get(name.lexeme) ?? null;
@@ -35,5 +48,9 @@ export default class Environment {
     }
 
     throw new RuntimeError(name, `Undefined variable "${name.lexeme}".`);
+  }
+
+  assignAt(distance: number, name: Token, value: NullableObj) {
+    this.ancestor(distance).values.set(name.lexeme, value);
   }
 }
