@@ -7,8 +7,7 @@ import { TokenType } from './TokenType.js';
 import { Parser } from './Parser.js';
 import { RuntimeError } from './Error.js';
 import { Interpreter } from './Interpreter.js';
-import { Stmt } from './Stmt.js';
-import { Expr } from './Expr.js';
+import { Resolver } from './Resolver.js';
 
 type ExitCode = 0 | 7;
 export default class Lox {
@@ -62,13 +61,16 @@ export default class Lox {
     this.exit(Lox.hadRuntimeError ? 7 : 0);
   }
 
-  private run(source: string): void {
+   run(source: string): void {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens);
     const syntax = parser.parseRepl();
 
     if (Lox.hadError) return;
+
+    const resolver = new Resolver(this.interpreter);
+    resolver.resolve(syntax);
 
     const result = this.interpreter.interpret(syntax);
     if (result) console.log(`= ${result}`);
