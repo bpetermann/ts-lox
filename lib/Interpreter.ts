@@ -4,6 +4,7 @@ import { RuntimeError } from './Error.js';
 import * as Expr from './Expr.js';
 import Lox from './Lox.js';
 import { LoxCallable, Clock } from './LoxCallble.js';
+import { LoxClass } from './LoxClass.js';
 import { LoxFunction } from './LoxFunction.js';
 import { Return } from './Return.js';
 import * as Stmt from './Stmt.js';
@@ -260,6 +261,12 @@ export class Interpreter
     this.executeBlock(stmt.statements, new Environment(this.environment));
   }
 
+  visitClassStmt(stmt: Stmt.ClassStmt): void {
+    this.environment.define(stmt.name.lexeme, null);
+    const klass = new LoxClass(stmt.name.lexeme);
+    this.environment.assign(stmt.name, klass);
+  }
+
   private isTruthy(object: NullableObj): boolean {
     if (object === null || object === 'nil') return false;
     if (typeof object === 'boolean') return Boolean(object);
@@ -308,12 +315,6 @@ export class Interpreter
   }
 
   visitThisExpr(expr: Expr.This): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  // Statements
-
-  visitClassStmt(stmt: Stmt.ClassStmt): void {
     throw new Error('Method not implemented.');
   }
 }

@@ -43,6 +43,7 @@ export class Parser {
 
   private declaration(): Statement | undefined {
     try {
+      if (this.match(TT.CLASS)) return this.classDeclaration();
       if (this.check(TT.FUN) && this.checkNext(TT.IDENTIFIER)) {
         this.consume(TT.FUN, '');
         return this.func('function');
@@ -52,6 +53,21 @@ export class Parser {
     } catch (err) {
       this.synchronize();
     }
+  }
+
+  private classDeclaration(): Statement {
+    const name = this.consume(TT.IDENTIFIER, 'Expect class name.');
+    this.consume(TT.LEFT_BRACE, "Expect '{' before class body.");
+
+    const methods: Array<Stmt.FunctionStmt> = [];
+
+    while (!this.check(TT.RIGHT_BRACE) && !this.isAtEnd()) {
+      methods.push(this.func('method'));
+    }
+
+    this.consume(TT.RIGHT_BRACE, "Expect '}' after class body.");
+
+    return new Stmt.ClassStmt(name, methods);
   }
 
   private statement(): Statement {

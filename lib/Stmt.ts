@@ -28,8 +28,15 @@ class BlockStmt extends Stmt {
 }
 
 class ClassStmt extends Stmt {
+  constructor(
+    public readonly name: Token,
+    public readonly methods: Array<FunctionStmt>
+  ) {
+    super();
+  }
+
   override accept<T>(visitor: Visitor<T>): T {
-    throw new Error('Method not implemented.');
+    return visitor.visitClassStmt(this);
   }
 }
 

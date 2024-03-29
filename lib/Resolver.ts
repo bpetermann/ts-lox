@@ -77,7 +77,8 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   }
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
-    throw new Error('Method not implemented.');
+    this.declare(stmt.name);
+    this.define(stmt.name);
   }
 
   visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
