@@ -149,10 +149,6 @@ export class Interpreter
     throw new RuntimeError(expr.name, 'Only instances have properties.');
   }
 
-  isCallable(callee: NullableObj): callee is LoxCallable {
-    return (callee as LoxCallable).call !== undefined;
-  }
-
   visitGroupingExpr(expr: Expr.Grouping): NullableObj {
     return this.evaluate(expr.expression);
   }
@@ -183,6 +179,21 @@ export class Interpreter
     const value = this.evaluate(expr.value);
     object.set(expr.name, value);
     return value;
+  }
+
+  visitSuperExpr(expr: Expr.Super): NullableObj {
+    const distance = this.locals.get(expr) as number;
+    const superclass = this.environment.getAt(distance, 'super') as LoxClass;
+    const object = this.environment.getAt(distance - 1, 'super') as LoxInstance;
+    const method = superclass.findMethod(expr.method.lexeme) as LoxFunction;
+
+    if (!method) {
+      throw new RuntimeError(
+        expr.method,
+        `Undefined property "${expr.method.lexeme}".`
+      );
+    }
+    return method.bind(object);
   }
 
   visitThisExpr(expr: Expr.This): NullableObj {
@@ -290,9 +301,24 @@ export class Interpreter
   }
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
+    let superclass: NullableObj = null;
+    if (stmt.superclass) {
+      superclass = this.evaluate(stmt.superclass);
+      if (!(superclass instanceof LoxClass)) {
+        throw new RuntimeError(
+          stmt.superclass.name,
+          'Superclass must be a class.'
+        );
+      }
+    }
     this.environment.define(stmt.name.lexeme, null);
 
-    const methods = new Map();
+    if (stmt.superclass) {
+      this.environment = new Environment(this.environment);
+      this.environment.define('super', superclass);
+    }
+
+    const methods: Map<string, LoxFunction> = new Map();
 
     stmt.methods.forEach((method) => {
       const func = new LoxFunction(
@@ -304,8 +330,17 @@ export class Interpreter
       methods.set(method.name.lexeme, func);
     });
 
-    const klass = new LoxClass(stmt.name.lexeme, methods);
+    const klass = new LoxClass(stmt.name.lexeme, superclass, methods);
+
+    if (superclass) {
+      this.environment = this.environment.enclosing!;
+    }
+
     this.environment.assign(stmt.name, klass);
+  }
+
+  isCallable(callee: NullableObj): callee is LoxCallable {
+    return (callee as LoxCallable).call !== undefined;
   }
 
   private isTruthy(object: NullableObj): boolean {
@@ -340,10 +375,5 @@ export class Interpreter
       default:
         return colors.white(object.toString());
     }
-  }
-
-  // Expressions
-  visitSuperExpr(expr: Expr.Super): NullableObj {
-    throw new Error('Method not implemented.');
   }
 }

@@ -129,4 +129,32 @@ describe('Test interpretor visitor class', () => {
     readEvalPrint(input);
     expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
+
+  test('class inheritance', () => {
+    const input = `
+    class Foo {
+      toString() {
+        print "Foo";
+      }
+    }
+    
+    class Bar < Foo {
+      toString() {
+        super.toString();
+        print "Bar";
+      }
+    }
+    
+    Bar().toString();
+    `;
+
+    const expectedLogs = ['Foo', 'Bar'];
+
+    readEvalPrint(input);
+
+    expect(logSpy).toHaveBeenCalledTimes(2);
+    expectedLogs.forEach((log) => {
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining(log));
+    });
+  });
 });

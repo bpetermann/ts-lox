@@ -14,6 +14,7 @@ enum FunctionType {
 enum ClassType {
   NONE,
   CLASS,
+  SUBCLASS,
 }
 
 export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
@@ -92,6 +93,21 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.declare(stmt.name);
     this.define(stmt.name);
 
+    if (stmt.superclass && stmt.name.lexeme === stmt.superclass.name.lexeme)
+      Lox.parseError(
+        stmt.superclass?.name,
+        "A class can't inherit from itself."
+      );
+    if (stmt.superclass) {
+      this.currentClass = ClassType.SUBCLASS;
+      this.resolve(stmt.superclass);
+    }
+
+    if (stmt.superclass) {
+      this.beginScope();
+      this.peek().set('super', true);
+    }
+
     this.beginScope();
     this.peek().set('this', true);
 
@@ -104,6 +120,8 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     });
 
     this.endScope();
+    if (stmt.superclass) this.endScope();
+
     this.currentClass = enclosingClass;
   }
 
@@ -207,6 +225,18 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.resolve(expr.object);
   }
 
+  visitSuperExpr(expr: Expr.Super): void {
+    if (this.currentClass === ClassType.NONE) {
+      Lox.parseError(expr.keyword, "Can't use 'super' outside of a class.");
+    } else if (this.currentClass !== ClassType.SUBCLASS) {
+      Lox.parseError(
+        expr.keyword,
+        "Can't use 'super' in a class with no superclass."
+      );
+    }
+    this.resolveLocal(expr, expr.keyword);
+  }
+
   visitThisExpr(expr: Expr.This): void {
     if (this.currentClass === ClassType.NONE)
       return Lox.parseError(
@@ -218,9 +248,5 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
 
   visitUnaryExpr(expr: Expr.Unary): void {
     this.resolve(expr.right);
-  }
-
-  visitSuperExpr(expr: Expr.Super): void {
-    throw new Error('Method not implemented.');
   }
 }

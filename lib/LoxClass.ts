@@ -7,6 +7,7 @@ import { LoxInstance } from './LoxInstance.js';
 export class LoxClass implements LoxCallable {
   constructor(
     public readonly name: string,
+    public readonly superclass: LoxClass | null,
     public readonly methods: Map<string, LoxFunction>
   ) {}
 
@@ -19,6 +20,7 @@ export class LoxClass implements LoxCallable {
 
   findMethod(name: string): LoxFunction | null {
     if (this.methods.has(name)) return this.methods.get(name)!;
+    if (this.superclass) return this.superclass.findMethod(name);
 
     return null;
   }
