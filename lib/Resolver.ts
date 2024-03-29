@@ -20,16 +20,16 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
       : input.accept(this);
   }
 
-  private resolveFunction(func: Stmt.FunctionStmt, type: FunctionType): void {
+  private resolveFunction(func: Expr.Function, type: FunctionType): void {
     const enclosingFunction = this.currentFunction;
     this.currentFunction = type;
 
     this.beginScope();
-    func.func.params.forEach((param) => {
+    func.params.forEach((param) => {
       this.declare(param);
       this.define(param);
     });
-    this.resolve(func.func.body);
+    this.resolve(func.body);
     this.endScope();
     this.currentFunction = enclosingFunction;
   }
@@ -76,6 +76,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.endScope();
   }
 
+  visitClassStmt(stmt: Stmt.ClassStmt): void {
+    throw new Error('Method not implemented.');
+  }
+
   visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
     this.resolve(stmt.expression);
   }
@@ -111,7 +115,11 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.declare(stmt.name);
     this.define(stmt.name);
 
-    this.resolveFunction(stmt, FunctionType.FUNCTION);
+    this.resolveFunction(stmt.func, FunctionType.FUNCTION);
+  }
+
+  visitFunctionExpr(expr: Expr.Function): void {
+    this.resolveFunction(expr, FunctionType.FUNCTION);
   }
 
   visitIfStmt(stmt: Stmt.IfStmt): void {
@@ -168,12 +176,6 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     throw new Error('Method not implemented.');
   }
   visitThisExpr(expr: Expr.This): void {
-    throw new Error('Method not implemented.');
-  }
-  visitFunctionExpr(expr: Expr.Function): void {
-    throw new Error('Method not implemented.');
-  }
-  visitClassStmt(stmt: Stmt.ClassStmt): void {
     throw new Error('Method not implemented.');
   }
 }
