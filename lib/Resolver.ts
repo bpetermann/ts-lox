@@ -4,8 +4,13 @@ import Lox from './Lox.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
 
+enum FunctionType {
+  NONE,
+  FUNCTION,
+}
 export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   private scopes: Array<Map<string, boolean>> = new Array();
+  private currentFunction: FunctionType = FunctionType.NONE;
 
   constructor(private readonly interpreter: Interpreter) {}
 
@@ -15,7 +20,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
       : input.accept(this);
   }
 
-  private resolveFunction(func: Stmt.FunctionStmt): void {
+  private resolveFunction(func: Stmt.FunctionStmt, type: FunctionType): void {
+    const enclosingFunction = this.currentFunction;
+    this.currentFunction = type;
+
     this.beginScope();
     func.func.params.forEach((param) => {
       this.declare(param);
@@ -23,6 +31,7 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     });
     this.resolve(func.func.body);
     this.endScope();
+    this.currentFunction = enclosingFunction;
   }
 
   private beginScope(): void {
@@ -102,7 +111,7 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.declare(stmt.name);
     this.define(stmt.name);
 
-    this.resolveFunction(stmt);
+    this.resolveFunction(stmt, FunctionType.FUNCTION);
   }
 
   visitIfStmt(stmt: Stmt.IfStmt): void {
@@ -116,6 +125,8 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   }
 
   visitReturnStmt(stmt: Stmt.ReturnStmt): void {
+    if (this.currentFunction === FunctionType.NONE)
+      Lox.parseError(stmt.keyword, "Can't return from top-level code.");
     if (stmt.value) this.resolve(stmt.value);
   }
 

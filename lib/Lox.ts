@@ -61,7 +61,7 @@ export default class Lox {
     this.exit(Lox.hadRuntimeError ? 7 : 0);
   }
 
-   run(source: string): void {
+  run(source: string): void {
     const scanner = new Scanner(source);
     const tokens = scanner.scanTokens();
     const parser = new Parser(tokens);
@@ -71,6 +71,8 @@ export default class Lox {
 
     const resolver = new Resolver(this.interpreter);
     resolver.resolve(syntax);
+
+    if (Lox.hadError) return;
 
     const result = this.interpreter.interpret(syntax);
     if (result) console.log(`= ${result}`);
