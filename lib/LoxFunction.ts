@@ -4,6 +4,7 @@ import { Interpreter } from './Interpreter.js';
 import { LoxCallable } from './LoxCallble.js';
 import { Return } from './Return.js';
 import * as Expr from './Expr.js';
+import { LoxInstance } from './LoxInstance';
 
 export class LoxFunction implements LoxCallable {
   public readonly arity: number;
@@ -34,5 +35,11 @@ export class LoxFunction implements LoxCallable {
   toString(): string {
     if (!this.name) return '<fn>';
     return `<fn ${this.name}>`;
+  }
+
+  bind(instance: LoxInstance): LoxFunction {
+    const environment = new Environment(this.closure);
+    environment.define('this', instance);
+    return new LoxFunction(null, this.declaration, environment);
   }
 }

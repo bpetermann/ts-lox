@@ -237,6 +237,9 @@ export class Parser {
       if (expr instanceof Expr.Variable) {
         const name = (expr as Expr.Variable).name;
         return new Expr.Assign(name, value);
+      } else if (expr instanceof Expr.Get) {
+        const get = expr;
+        return new Expr.SetExpr(get.object, get.name, value);
       }
 
       throw this.ParseError(equals, 'Invalid assignment target.');
@@ -350,6 +353,12 @@ export class Parser {
     while (true) {
       if (this.match(TT.LEFT_PAREN)) {
         expr = this.finishCall(expr);
+      } else if (this.match(TT.DOT)) {
+        const name = this.consume(
+          TT.IDENTIFIER,
+          "Expect property name after '.'."
+        );
+        expr = new Expr.Get(expr, name);
       } else {
         break;
       }
@@ -365,7 +374,7 @@ export class Parser {
     if (this.match(TT.NIL)) return new Expr.Literal(null);
     if (this.match(TT.NUMBER, TT.STRING))
       return new Expr.Literal(this.previous().literal);
-
+    if (this.match(TT.THIS)) return new Expr.This(this.previous());
     if (this.match(TT.IDENTIFIER)) return new Expr.Variable(this.previous());
 
     if (this.match(TT.LEFT_PAREN)) {

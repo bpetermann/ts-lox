@@ -7,10 +7,18 @@ import { Token } from './Token.js';
 enum FunctionType {
   NONE,
   FUNCTION,
+  METHOD,
 }
+
+enum ClassType {
+  NONE,
+  CLASS,
+}
+
 export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   private scopes: Array<Map<string, boolean>> = new Array();
   private currentFunction: FunctionType = FunctionType.NONE;
+  private currentClass: ClassType = ClassType.NONE;
 
   constructor(private readonly interpreter: Interpreter) {}
 
@@ -77,8 +85,22 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   }
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
+    const enclosingClass = this.currentClass;
+    this.currentClass = ClassType.CLASS;
+
     this.declare(stmt.name);
     this.define(stmt.name);
+
+    this.beginScope();
+    this.peek().set('this', true);
+
+    stmt.methods.forEach((method) => {
+      const declaration = FunctionType.METHOD;
+      this.resolveFunction(method.func, declaration);
+    });
+
+    this.endScope();
+    this.currentClass = enclosingClass;
   }
 
   visitExpressionStmt(stmt: Stmt.ExpressionStmt): void {
@@ -150,6 +172,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     expr.args.forEach((arg) => this.resolve(arg));
   }
 
+  visitGetExpr(expr: Expr.Get): void {
+    this.resolve(expr.object);
+  }
+
   visitGroupingExpr(expr: Expr.Grouping): void {
     this.resolve(expr.expression);
   }
@@ -163,20 +189,25 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.resolve(expr.right);
   }
 
+  visitSetExpr(expr: Expr.SetExpr): void {
+    this.resolve(expr.value);
+    this.resolve(expr.object);
+  }
+
+  visitThisExpr(expr: Expr.This): void {
+    if (this.currentClass === ClassType.NONE)
+      return Lox.parseError(
+        expr.keyword,
+        "Can't use 'this' outside of a class."
+      );
+    this.resolveLocal(expr, expr.keyword);
+  }
+
   visitUnaryExpr(expr: Expr.Unary): void {
     this.resolve(expr.right);
   }
 
-  visitGetExpr(expr: Expr.Get): void {
-    throw new Error('Method not implemented.');
-  }
-  visitSetExpr(expr: Expr.SetExpr): void {
-    throw new Error('Method not implemented.');
-  }
   visitSuperExpr(expr: Expr.Super): void {
-    throw new Error('Method not implemented.');
-  }
-  visitThisExpr(expr: Expr.This): void {
     throw new Error('Method not implemented.');
   }
 }

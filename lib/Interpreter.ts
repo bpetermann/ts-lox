@@ -6,6 +6,7 @@ import Lox from './Lox.js';
 import { LoxCallable, Clock } from './LoxCallble.js';
 import { LoxClass } from './LoxClass.js';
 import { LoxFunction } from './LoxFunction.js';
+import { LoxInstance } from './LoxInstance.js';
 import { Return } from './Return.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
@@ -139,6 +140,15 @@ export class Interpreter
     return func.call(this, args);
   }
 
+  visitGetExpr(expr: Expr.Get): NullableObj {
+    const object = this.evaluate(expr.object);
+    if (object instanceof LoxInstance) {
+      return object.get(expr.name);
+    }
+
+    throw new RuntimeError(expr.name, 'Only instances have properties.');
+  }
+
   isCallable(callee: NullableObj): callee is LoxCallable {
     return (callee as LoxCallable).call !== undefined;
   }
@@ -161,6 +171,22 @@ export class Interpreter
     }
 
     return this.evaluate(expr.right);
+  }
+
+  visitSetExpr(expr: Expr.SetExpr): NullableObj {
+    const object = this.evaluate(expr.object);
+
+    if (!(object instanceof LoxInstance)) {
+      throw new RuntimeError(expr.name, 'Only instances have fields.');
+    }
+
+    const value = this.evaluate(expr.value);
+    object.set(expr.name, value);
+    return value;
+  }
+
+  visitThisExpr(expr: Expr.This): NullableObj {
+    return this.lookUpVariable(expr.keyword, expr);
   }
 
   visitUnaryExpr(expr: Expr.Unary): NullableObj {
@@ -263,7 +289,15 @@ export class Interpreter
 
   visitClassStmt(stmt: Stmt.ClassStmt): void {
     this.environment.define(stmt.name.lexeme, null);
-    const klass = new LoxClass(stmt.name.lexeme);
+
+    const methods = new Map();
+
+    stmt.methods.forEach((method) => {
+      const func = new LoxFunction(null, method.func, this.environment);
+      methods.set(method.name.lexeme, func);
+    });
+
+    const klass = new LoxClass(stmt.name.lexeme, methods);
     this.environment.assign(stmt.name, klass);
   }
 
@@ -302,19 +336,7 @@ export class Interpreter
   }
 
   // Expressions
-  visitGetExpr(expr: Expr.Get): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitSetExpr(expr: Expr.SetExpr): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
   visitSuperExpr(expr: Expr.Super): NullableObj {
-    throw new Error('Method not implemented.');
-  }
-
-  visitThisExpr(expr: Expr.This): NullableObj {
     throw new Error('Method not implemented.');
   }
 }
