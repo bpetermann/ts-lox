@@ -98,4 +98,35 @@ describe('Test interpretor visitor class', () => {
     readEvalPrint(input);
     expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
   });
+
+  test('classes', () => {
+    const input = `class Cake {
+      taste() {
+        var adjective = "delicious";
+        print "The " + this.flavor + " cake is " + adjective + "!";
+      }
+    }
+    var cake = Cake();
+    cake.flavor = "Gugelhupf";
+    cake.taste();
+    `;
+    const expected = 'The Gugelhupf cake is delicious!';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
+  });
+
+  test('classes init mehtod', () => {
+    const input = `class Foo {
+      init() {
+        print "init";
+      }
+    }
+    var foo = Foo();
+    `;
+    const expected = 'init';
+
+    readEvalPrint(input);
+    expect(logSpy).toHaveBeenCalledWith(expect.stringMatching(expected));
+  });
 });

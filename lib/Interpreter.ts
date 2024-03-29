@@ -130,7 +130,7 @@ export class Interpreter
     }
 
     const func = callee as LoxCallable;
-    if (args.length !== func.arity) {
+    if (args.length !== func.arity()) {
       throw new RuntimeError(
         expr.paren,
         `Expected ${func.arity} arguments but got ${args.length}.`
@@ -229,7 +229,7 @@ export class Interpreter
   }
 
   visitFunctionExpr(expr: Expr.Function): NullableObj {
-    return new LoxFunction(null, expr, this.environment);
+    return new LoxFunction(null, expr, this.environment, false);
   }
 
   private evaluate(expr: Expr.Expr): NullableObj {
@@ -241,11 +241,13 @@ export class Interpreter
   }
 
   visitFunctionStmt(stmt: Stmt.FunctionStmt): void {
-    const fnName = stmt.name.lexeme;
-    this.environment.define(
-      fnName,
-      new LoxFunction(fnName, stmt.func, this.environment)
+    const func = new LoxFunction(
+      stmt.name.lexeme,
+      stmt.func,
+      this.environment,
+      false
     );
+    this.environment.define(stmt.name.lexeme, func);
   }
 
   visitIfStmt(stmt: Stmt.IfStmt): void {
@@ -293,7 +295,12 @@ export class Interpreter
     const methods = new Map();
 
     stmt.methods.forEach((method) => {
-      const func = new LoxFunction(null, method.func, this.environment);
+      const func = new LoxFunction(
+        method.name.lexeme,
+        method.func,
+        this.environment,
+        method.name.lexeme === 'init'
+      );
       methods.set(method.name.lexeme, func);
     });
 
@@ -331,7 +338,7 @@ export class Interpreter
       case 'boolean':
         return colors.blue(object.toString());
       default:
-        return object.toString();
+        return colors.white(object.toString());
     }
   }
 

@@ -5,8 +5,6 @@ import { LoxFunction } from './LoxFunction';
 import { LoxInstance } from './LoxInstance.js';
 
 export class LoxClass implements LoxCallable {
-  public readonly arity: number = 0;
-
   constructor(
     public readonly name: string,
     public readonly methods: Map<string, LoxFunction>
@@ -14,6 +12,8 @@ export class LoxClass implements LoxCallable {
 
   call(interpreter: Interpreter, args: NullableObj[]): NullableObj {
     const instance = new LoxInstance(this);
+    const initializer = this.findMethod('init');
+    if (initializer) initializer.bind(instance).call(interpreter, args);
     return instance;
   }
 
@@ -25,5 +25,11 @@ export class LoxClass implements LoxCallable {
 
   toString() {
     return this.name;
+  }
+
+  arity(): number {
+    const initializer = this.findMethod('init');
+    if (!initializer) return 0;
+    return initializer.arity();
   }
 }

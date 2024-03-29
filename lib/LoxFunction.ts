@@ -7,15 +7,12 @@ import * as Expr from './Expr.js';
 import { LoxInstance } from './LoxInstance';
 
 export class LoxFunction implements LoxCallable {
-  public readonly arity: number;
-
   constructor(
     public readonly name: string | null,
     public readonly declaration: Expr.Function,
-    public readonly closure: Environment
-  ) {
-    this.arity = declaration.params.length;
-  }
+    public readonly closure: Environment,
+    private readonly isInitializer: boolean
+  ) {}
 
   call(interpreter: Interpreter, args: NullableObj[]): NullableObj {
     const environment = new Environment(this.closure);
@@ -27,8 +24,12 @@ export class LoxFunction implements LoxCallable {
     try {
       interpreter.executeBlock(this.declaration.body, environment);
     } catch (returnValue: any) {
+      if (this.isInitializer) return this.closure.getAt(0, 'this');
       return returnValue instanceof Return ? returnValue.value : null;
     }
+
+    if (this.isInitializer) return this.closure.getAt(0, 'this');
+
     return null;
   }
 
@@ -40,6 +41,15 @@ export class LoxFunction implements LoxCallable {
   bind(instance: LoxInstance): LoxFunction {
     const environment = new Environment(this.closure);
     environment.define('this', instance);
-    return new LoxFunction(null, this.declaration, environment);
+    return new LoxFunction(
+      null,
+      this.declaration,
+      environment,
+      this.isInitializer
+    );
+  }
+
+  arity(): number {
+    return this.declaration.params.length;
   }
 }

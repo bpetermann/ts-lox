@@ -7,6 +7,7 @@ import { Token } from './Token.js';
 enum FunctionType {
   NONE,
   FUNCTION,
+  INITIALIZER,
   METHOD,
 }
 
@@ -95,7 +96,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.peek().set('this', true);
 
     stmt.methods.forEach((method) => {
-      const declaration = FunctionType.METHOD;
+      let declaration = FunctionType.METHOD;
+      if (method.name.lexeme === 'init') {
+        declaration = FunctionType.INITIALIZER;
+      }
       this.resolveFunction(method.func, declaration);
     });
 
@@ -158,7 +162,16 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   visitReturnStmt(stmt: Stmt.ReturnStmt): void {
     if (this.currentFunction === FunctionType.NONE)
       Lox.parseError(stmt.keyword, "Can't return from top-level code.");
-    if (stmt.value) this.resolve(stmt.value);
+    if (stmt.value) {
+      if (this.currentFunction === FunctionType.INITIALIZER) {
+        Lox.parseError(
+          stmt.keyword,
+          "Can't return a value from an initializer."
+        );
+      }
+
+      this.resolve(stmt.value);
+    }
   }
 
   visitBinaryExpr(expr: Expr.Binary): void {
