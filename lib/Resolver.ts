@@ -3,6 +3,7 @@ import { Interpreter } from './Interpreter';
 import Lox from './Lox.js';
 import * as Stmt from './Stmt.js';
 import { Token } from './Token.js';
+import { Stack } from './utils/Stack.js';
 
 enum FunctionType {
   NONE,
@@ -18,7 +19,7 @@ enum ClassType {
 }
 
 export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
-  private scopes: Array<Map<string, boolean>> = new Array();
+  private scopes: Stack<Map<string, boolean>> = new Stack();
   private currentFunction: FunctionType = FunctionType.NONE;
   private currentClass: ClassType = ClassType.NONE;
 
@@ -52,14 +53,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.scopes.pop();
   }
 
-  private peek(): Map<string, boolean> {
-    return this.scopes[this.scopes.length - 1];
-  }
-
   private declare(name: Token): void {
-    if (!this.scopes.length) return;
+    if (this.scopes.isEmpty()) return;
 
-    const scope = this.peek();
+    const scope = this.scopes.peek();
     if (scope.has(name.lexeme))
       Lox.parseError(name, 'Already a variable with this name in this scope.');
 
@@ -67,14 +64,14 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   }
 
   private define(name: Token): void {
-    if (!this.scopes.length) return;
-    this.peek().set(name.lexeme, true);
+    if (this.scopes.isEmpty()) return;
+    this.scopes.peek().set(name.lexeme, true);
   }
 
   private resolveLocal(expr: Expr.Expr, name: Token): void {
-    for (let i = this.scopes.length - 1; i >= 0; i--) {
-      if (this.scopes[i].has(name.lexeme)) {
-        this.interpreter.resolve(expr, this.scopes.length - 1 - i);
+    for (let i = this.scopes.size() - 1; i >= 0; i--) {
+      if (this.scopes.get(i)?.has(name.lexeme)) {
+        this.interpreter.resolve(expr, this.scopes.size() - 1 - i);
         return;
       }
     }
@@ -105,11 +102,11 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
 
     if (stmt.superclass) {
       this.beginScope();
-      this.peek().set('super', true);
+      this.scopes.peek().set('super', true);
     }
 
     this.beginScope();
-    this.peek().set('this', true);
+    this.scopes.peek().set('this', true);
 
     stmt.methods.forEach((method) => {
       let declaration = FunctionType.METHOD;
@@ -146,7 +143,10 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   }
 
   visitVariableExpr(expr: Expr.Variable): void {
-    if (this.scopes.length && this.peek().get(expr.name.lexeme) === false) {
+    if (
+      !this.scopes.isEmpty() &&
+      this.scopes.peek().get(expr.name.lexeme) === false
+    ) {
       Lox.parseError(
         expr.name,
         "Can't read local variable in its own initializer."
