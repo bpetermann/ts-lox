@@ -17,9 +17,9 @@ export class LoxFunction implements LoxCallable {
   call(interpreter: Interpreter, args: NullableObj[]): NullableObj {
     const environment = new Environment(this.closure);
 
-    this.declaration.params.forEach((p, i) =>
-      environment.define(p.lexeme, args[i])
-    );
+    for (let i = 0; i < this.declaration.params.length; i++) {
+      environment.define(this.declaration.params[i].lexeme, args[i]);
+    }
 
     try {
       interpreter.executeBlock(this.declaration.body, environment);

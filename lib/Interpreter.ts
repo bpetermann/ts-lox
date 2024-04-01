@@ -35,7 +35,9 @@ export class Interpreter
   }
 
   private interpretStmt(statements: Array<Statement>): void {
-    statements.forEach((stmt) => this.execute(stmt));
+    for (let i = 0; i < statements.length; i++) {
+      this.execute(statements[i]);
+    }
   }
 
   private interpretExpr(expression: Expression): string {
@@ -57,7 +59,9 @@ export class Interpreter
     try {
       this.environment = env;
 
-      statements.forEach((stmt) => this.execute(stmt));
+      for (let i = 0; i < statements.length; i++) {
+        this.execute(statements[i]);
+      }
     } finally {
       this.environment = previous;
     }
@@ -120,7 +124,10 @@ export class Interpreter
     const callee = this.evaluate(expr.callee);
 
     const args: Array<NullableObj> = [];
-    expr.args.forEach((arg) => args.push(this.evaluate(arg)));
+
+    for (let i = 0; i < expr.args.length; i++) {
+      args.push(this.evaluate(expr.args[i]));
+    }
 
     if (!this.isCallable(callee)) {
       throw new RuntimeError(
@@ -320,15 +327,15 @@ export class Interpreter
 
     const methods: Map<string, LoxFunction> = new Map();
 
-    stmt.methods.forEach((method) => {
+    for (let i = 0; i < stmt.methods.length; i++) {
       const func = new LoxFunction(
-        method.name.lexeme,
-        method.func,
+        stmt.methods[i].name.lexeme,
+        stmt.methods[i].func,
         this.environment,
-        method.name.lexeme === 'init'
+        stmt.methods[i].name.lexeme === 'init'
       );
-      methods.set(method.name.lexeme, func);
-    });
+      methods.set(stmt.methods[i].name.lexeme, func);
+    }
 
     const klass = new LoxClass(stmt.name.lexeme, superclass, methods);
 

@@ -26,9 +26,13 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   constructor(private readonly interpreter: Interpreter) {}
 
   resolve(input: Stmt.Stmt | Expr.Expr | Array<Stmt.Stmt>): void {
-    Array.isArray(input)
-      ? input.forEach((s) => this.resolve(s))
-      : input.accept(this);
+    if (Array.isArray(input)) {
+      for (let i = 0; i < input.length; i++) {
+        this.resolve(input[i]);
+      }
+    } else {
+      input.accept(this);
+    }
   }
 
   private resolveFunction(func: Expr.Function, type: FunctionType): void {
@@ -36,10 +40,11 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.currentFunction = type;
 
     this.beginScope();
-    func.params.forEach((param) => {
-      this.declare(param);
-      this.define(param);
-    });
+    for (let i = 0; i < func.params.length; i++) {
+      this.declare(func.params[i]);
+      this.define(func.params[i]);
+    }
+
     this.resolve(func.body);
     this.endScope();
     this.currentFunction = enclosingFunction;
@@ -108,13 +113,13 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
     this.beginScope();
     this.scopes.peek().set('this', true);
 
-    stmt.methods.forEach((method) => {
+    for (let i = 0; i < stmt.methods.length; i++) {
       let declaration = FunctionType.METHOD;
-      if (method.name.lexeme === 'init') {
+      if (stmt.methods[i].name.lexeme === 'init') {
         declaration = FunctionType.INITIALIZER;
       }
-      this.resolveFunction(method.func, declaration);
-    });
+      this.resolveFunction(stmt.methods[i].func, declaration);
+    }
 
     this.endScope();
     if (stmt.superclass) this.endScope();
@@ -200,7 +205,9 @@ export class Resolver implements Expr.Visitor<void>, Stmt.Visitor<void> {
   visitCallExpr(expr: Expr.Call): void {
     this.resolve(expr.callee);
 
-    expr.args.forEach((arg) => this.resolve(arg));
+    for (let i = 0; i < expr.args.length; i++) {
+      this.resolve(expr.args[i]);
+    }
   }
 
   visitGetExpr(expr: Expr.Get): void {

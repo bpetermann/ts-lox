@@ -4,9 +4,9 @@ fun fib(n) {
 }
 
 var before = clock();
-fib(40);
+fib(35);
 var after = clock();
 var time = (after - before) / 1000;
 
-print "🧪 execute fibonacci 40 times in...";
+print "🧪 execute fibonacci 35 times in...";
 print time + " s";
