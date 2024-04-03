@@ -23,7 +23,7 @@ export class LoxFunction implements LoxCallable {
 
     try {
       interpreter.executeBlock(this.declaration.body, environment);
-    } catch (returnValue: any) {
+    } catch (returnValue) {
       if (this.isInitializer) return this.closure.getAt(0, 'this');
       return returnValue instanceof Return ? returnValue.value : null;
     }

@@ -1,4 +1,3 @@
-import { NullableObj } from './@types';
 import * as Expr from './Expr';
 
 export class AstPrinter implements Expr.Visitor<string> {

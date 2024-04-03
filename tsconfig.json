@@ -5,6 +5,8 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "noImplicitOverride": true,
+    "strict": true,
+    "noImplicitAny": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "resolveJsonModule": true,

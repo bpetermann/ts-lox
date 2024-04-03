@@ -1,7 +1,6 @@
 import { NullableObj } from './@types/index.js';
 import { RuntimeError } from './Error.js';
 import { LoxClass } from './LoxClass.js';
-import { LoxFunction } from './LoxFunction.js';
 import { Token } from './Token.js';
 
 export class LoxInstance {

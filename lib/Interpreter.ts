@@ -30,7 +30,7 @@ export class Interpreter
         ? this.interpretStmt(input)
         : this.interpretExpr(input);
     } catch (err) {
-      Lox.runtimeError(err);
+      Lox.runtimeError(err as RuntimeError);
     }
   }
 
