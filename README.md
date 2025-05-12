@@ -51,13 +51,10 @@ npm run test
 
 ## Performance
 
-The following command executes the benchmark test contained in the book, the recursive Fibonacci function from above with the input of 40... ugh, it takes long, like really, really long... like not even comparable to the Java implementation in the book.
-Making this implementation more efficient is also a future task.
+The following command executes the benchmark test contained in the book, the recursive Fibonacci function from above with the input of 40.
 
 ```js
 npm run benchmark
 ```
 
-#### Updates:
 
-- [01/04/2024](https://github.com/bpetermann/ts-lox/commit/da530076ce7916e380ed7ebadb1dcdc687a672ed) Still slow as hell, but switching from forEach to for loops resulted in a ~25% performance improvement in the benchmark test.
